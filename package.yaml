@@ -1,0 +1,41 @@
+name:                jmespath-hs
+version:             0.1.0.0
+github:              "gcapizzi/jmespath-hs"
+license:             BSD3
+author:              "Giuseppe Capizzi"
+maintainer:          "g.capizzi@gmail.com"
+copyright:           "2018 Giuseppe Capizzi"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+synopsis:            Short description of your package
+category:            Text, JSON
+
+description:         Please see the README on Github at <https://github.com/gcapizzi/jmespath-hs#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+ghc-options:
+- -XOverloadedStrings
+
+library:
+  source-dirs: src
+  dependencies:
+  - bytestring
+  - aeson
+  - text
+  - unordered-containers
+
+tests:
+  jmespath-hs-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - jmespath-hs
+    - hspec

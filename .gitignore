@@ -1,0 +1,4 @@
+.stack-work/
+jmespath-hs.cabal
+*~
+.DS_Store
