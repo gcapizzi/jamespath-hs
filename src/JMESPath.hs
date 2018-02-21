@@ -7,11 +7,17 @@ import Data.Text
 import Data.Aeson
 import qualified Data.HashMap.Strict as HashMap
 
-search :: Text -> ByteString -> ByteString
-search query document = encode value
+search :: Text -> ByteString -> Either String ByteString
+search query document = do
+    documentValue <- eitherDecode document :: Either String Value
+    foundValue <- searchValue query documentValue
+    return $ encode foundValue
+
+searchValue :: Text -> Value -> Either String Value
+searchValue query document = Right foundValue
   where
-    value = HashMap.lookupDefault "" query object
-    object = case decodedValue of
-        Just (Object o) -> o
+    foundValue = HashMap.lookupDefault "" query object
+    object = case document of
+        Object o -> o
         _        -> HashMap.empty
-    decodedValue = decode document :: Maybe Value
+  
