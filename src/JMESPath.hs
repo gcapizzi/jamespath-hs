@@ -16,7 +16,7 @@ search query document = do
 searchValue :: Text -> Value -> Either String Value
 searchValue query document = Right foundValue
   where
-    foundValue = HashMap.lookupDefault "" query object
+    foundValue = HashMap.lookupDefault Null query object
     object = case document of
         Object o -> o
         _        -> HashMap.empty
