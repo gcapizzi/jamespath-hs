@@ -13,9 +13,7 @@ import Data.Bifunctor
 type Parser = Parsec Void Text
 
 expression :: Parser Expression
-expression = do
-  e <- quotedIdentifier <|> unquotedIdentifier
-  return $ Identifier e
+expression = Identifier <$> (quotedIdentifier <|> unquotedIdentifier)
 
 unquotedIdentifier :: Parser Text
 unquotedIdentifier = pack <$> many alphaNumChar
