@@ -16,5 +16,6 @@ main = hspec $
           search "x" "{\"a\": \"foo\", \"b\": \"bar\", \"c\": \"baz\"}" `shouldBe` Right "null" 
 
       context "when the field is quoted" $
-        it "works" $
+        it "works" $ do
           search "\"with space\"" "{\"with space\": \"value\"}" `shouldBe` Right "\"value\""
+          search "\"special chars: !@#\"" "{\"special chars: !@#\": \"value\"}" `shouldBe` Right "\"value\""
