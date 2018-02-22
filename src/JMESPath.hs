@@ -5,9 +5,9 @@ module JMESPath
 import JMESPath.Ast
 import JMESPath.Parser
 
+import Data.Aeson
 import Data.ByteString.Lazy
 import Data.Text
-import Data.Aeson
 import qualified Data.HashMap.Strict as HashMap
 
 search :: Text -> ByteString -> Either String ByteString

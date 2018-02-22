@@ -4,11 +4,11 @@ module JMESPath.Parser
 
 import JMESPath.Ast
 
+import Data.Bifunctor
 import Data.Text
 import Data.Void
 import Text.Megaparsec
 import Text.Megaparsec.Char
-import Data.Bifunctor
 
 type Parser = Parsec Void Text
 
