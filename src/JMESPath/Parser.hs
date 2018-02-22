@@ -15,11 +15,13 @@ type Parser = Parsec Void Text
 expression :: Parser Expression
 expression = do
   e <- quotedIdentifier <|> unquotedIdentifier
-  return $ Identifier $ pack e
+  return $ Identifier e
 
-unquotedIdentifier = many alphaNumChar
-quotedIdentifier = between doubleQuote doubleQuote (many (alphaNumChar <|> char ' '))
-doubleQuote = char '"'
+unquotedIdentifier :: Parser Text
+unquotedIdentifier = pack <$> many alphaNumChar
+
+quotedIdentifier :: Parser Text
+quotedIdentifier = pack <$> between (char '"') (char '"') (many (alphaNumChar <|> char ' '))
 
 parseExpression :: Text -> Either String Expression
 parseExpression expressionText = first show $ parse expression "" expressionText
