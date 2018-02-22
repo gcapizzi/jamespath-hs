@@ -2,6 +2,9 @@ module JMESPath
     ( search
     ) where
 
+import JMESPath.Ast
+import JMESPath.Parser
+
 import Data.ByteString.Lazy
 import Data.Text
 import Data.Aeson
@@ -9,15 +12,15 @@ import qualified Data.HashMap.Strict as HashMap
 
 search :: Text -> ByteString -> Either String ByteString
 search query document = do
+    queryExpression <- parseExpression query
     documentValue <- eitherDecode document :: Either String Value
-    foundValue <- searchValue query documentValue
+    foundValue <- searchValue queryExpression documentValue
     return $ encode foundValue
 
-searchValue :: Text -> Value -> Either String Value
-searchValue query document = Right foundValue
+searchValue :: Expression -> Value -> Either String Value
+searchValue (Identifier identifier) document = Right foundValue
   where
-    foundValue = HashMap.lookupDefault Null query object
+    foundValue = HashMap.lookupDefault Null identifier object
     object = case document of
         Object o -> o
         _        -> HashMap.empty
-  

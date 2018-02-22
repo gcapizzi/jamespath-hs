@@ -14,3 +14,7 @@ main = hspec $
       context "when the field does not exist" $
         it "returns null" $
           search "x" "{\"a\": \"foo\", \"b\": \"bar\", \"c\": \"baz\"}" `shouldBe` Right "null" 
+
+      context "when the field is quoted" $
+        it "works" $
+          search "\"with space\"" "{\"with space\": \"value\"}" `shouldBe` Right "\"value\""

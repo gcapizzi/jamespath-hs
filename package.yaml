@@ -27,6 +27,7 @@ library:
   - aeson
   - text
   - unordered-containers
+  - megaparsec
 
 tests:
   jmespath-hs-test:
