@@ -13,13 +13,13 @@ import Text.Megaparsec.Char
 type Parser = Parsec Void Text
 
 expression :: Parser Expression
-expression = Identifier <$> (quotedIdentifier <|> unquotedIdentifier)
+expression = Identifier <$> (quotedString <|> unquotedString)
 
-unquotedIdentifier :: Parser Text
-unquotedIdentifier = pack <$> many alphaNumChar
+unquotedString :: Parser Text
+unquotedString = pack <$> many alphaNumChar
 
-quotedIdentifier :: Parser Text
-quotedIdentifier = pack <$> between (char '"') (char '"') (many (alphaNumChar <|> char ' '))
+quotedString :: Parser Text
+quotedString = pack <$> between (char '"') (char '"') (many (alphaNumChar <|> char ' '))
 
 parseExpression :: Text -> Either String Expression
 parseExpression expressionText = first show $ parse expression "" expressionText
