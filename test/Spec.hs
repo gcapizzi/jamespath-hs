@@ -19,3 +19,5 @@ main = hspec $
         it "works" $ do
           search "\"with space\"" "{\"with space\": \"value\"}" `shouldBe` Right "\"value\""
           search "\"special chars: !@#\"" "{\"special chars: !@#\": \"value\"}" `shouldBe` Right "\"value\""
+          search "\"\\\"\\b\\f\\n\\r\\t\"" "{\"\\\"\\b\\f\\n\\r\\t\": \"value\"}" `shouldBe` Right "\"value\""
+          search "\"\\u2713\"" "{\"\\u2713\": \"value\"}" `shouldBe` Right "\"value\""
