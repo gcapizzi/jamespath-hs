@@ -42,4 +42,4 @@ hexToChar :: String -> Char
 hexToChar = chr . fst . head . readHex
 
 parseExpression :: Text -> Either String Expression
-parseExpression expressionText = first show $ parse expression "" expressionText
+parseExpression expressionText = first parseErrorPretty $ parse expression "" expressionText
