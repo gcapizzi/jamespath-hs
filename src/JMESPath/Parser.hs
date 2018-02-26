@@ -2,7 +2,7 @@ module JMESPath.Parser
     ( parseExpression
     ) where
 
-import JMESPath.Ast
+import JMESPath.Core
 
 import Data.Bifunctor
 import Data.Char
