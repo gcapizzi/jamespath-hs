@@ -1,5 +1,7 @@
 import Test.Hspec
 
+import Data.Either
+
 import JMESPath
 
 main :: IO ()
@@ -8,19 +10,27 @@ main = hspec $
     context "with an identifier" $ do
       it "returns the value of the corresponding field in the input object" $ do
         search "a" "{\"a\": \"foo\", \"b\": \"bar\", \"c\": \"baz\"}" `shouldBe` Right "\"foo\""
-        search "b" "{\"a\": \"foo\", \"b\": \"bar\", \"c\": \"baz\"}" `shouldBe` Right "\"bar\""
-        search "c" "{\"a\": \"foo\", \"b\": \"bar\", \"c\": \"baz\"}" `shouldBe` Right "\"baz\""
+        search "B" "{\"A\": \"foo\", \"B\": \"bar\", \"C\": \"baz\"}" `shouldBe` Right "\"bar\""
+        search "_3" "{\"_1\": \"foo\", \"_2\": \"bar\", \"_3\": \"baz\"}" `shouldBe` Right "\"baz\""
 
       context "when the field does not exist" $
         it "returns null" $
           search "x" "{\"a\": \"foo\", \"b\": \"bar\", \"c\": \"baz\"}" `shouldBe` Right "null" 
 
-      context "when the field is quoted" $
+      context "when the identifier starts with a number" $
+        it "fails" $
+          search "1_a" "{\"1a\": \"foo\"}" `shouldSatisfy` isLeft
+
+      context "when the identifier is quoted" $ do
         it "works" $ do
           search "\"with space\"" "{\"with space\": \"value\"}" `shouldBe` Right "\"value\""
           search "\"special chars: !@#\"" "{\"special chars: !@#\": \"value\"}" `shouldBe` Right "\"value\""
           search "\"\\\"\\b\\f\\n\\r\\t\"" "{\"\\\"\\b\\f\\n\\r\\t\": \"value\"}" `shouldBe` Right "\"value\""
           search "\"\\u2713\"" "{\"\\u2713\": \"value\"}" `shouldBe` Right "\"value\""
+
+        context "when the identifier is an empty string" $
+          it "fails" $
+            search "\"\"" "{\"\": \"value\"}" `shouldSatisfy` isLeft
 
     context "with a sub-expression" $
       it "returns the corresponding value" $ do

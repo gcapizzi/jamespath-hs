@@ -28,10 +28,10 @@ identifier :: Parser Expression
 identifier = Identifier <$> (quotedString <|> unquotedString)
 
 unquotedString :: Parser Text
-unquotedString = pack <$> many alphaNumChar
+unquotedString = cons <$> (letterChar <|> char '_') <*> (pack <$> many (alphaNumChar <|> char '_'))
 
 quotedString :: Parser Text
-quotedString = pack <$> between (char '"') (char '"') (many (unescapedChar <|> escapedChar))
+quotedString = pack <$> between (char '"') (char '"') (some (unescapedChar <|> escapedChar))
 
 unescapedChar :: Parser Char
 unescapedChar = noneOf ['"', '\\']
