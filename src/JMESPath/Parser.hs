@@ -6,7 +6,8 @@ import JMESPath.Ast
 
 import Data.Bifunctor
 import Data.Char
-import Data.Text hiding (count, foldl, head)
+import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Void
 import Numeric
 import Text.Megaparsec
@@ -28,10 +29,10 @@ identifier :: Parser Expression
 identifier = Identifier <$> (quotedString <|> unquotedString)
 
 unquotedString :: Parser Text
-unquotedString = cons <$> (letterChar <|> char '_') <*> (pack <$> many (alphaNumChar <|> char '_'))
+unquotedString = T.cons <$> (letterChar <|> char '_') <*> (T.pack <$> many (alphaNumChar <|> char '_'))
 
 quotedString :: Parser Text
-quotedString = pack <$> between (char '"') (char '"') (some (unescapedChar <|> escapedChar))
+quotedString = T.pack <$> between (char '"') (char '"') (some (unescapedChar <|> escapedChar))
 
 unescapedChar :: Parser Char
 unescapedChar = noneOf ['"', '\\']
