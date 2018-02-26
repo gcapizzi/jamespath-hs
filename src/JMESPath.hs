@@ -24,3 +24,6 @@ searchValue (Identifier identifier) document = Right foundValue
     object = case document of
         Object o -> o
         _        -> HashMap.empty
+searchValue (SubExpression left right) document = do
+    leftEval <- searchValue left document
+    searchValue right leftEval

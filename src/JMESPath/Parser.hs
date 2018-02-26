@@ -6,7 +6,7 @@ import JMESPath.Ast
 
 import Data.Bifunctor
 import Data.Char
-import Data.Text hiding (count, head)
+import Data.Text hiding (count, foldl, head)
 import Data.Void
 import Numeric
 import Text.Megaparsec
@@ -15,7 +15,16 @@ import Text.Megaparsec.Char
 type Parser = Parsec Void Text
 
 expression :: Parser Expression
-expression = Identifier <$> (quotedString <|> unquotedString)
+expression = do
+    id <- identifier
+    subs <- many subExpression
+    return $ foldl SubExpression id subs
+
+subExpression :: Parser Expression
+subExpression = char '.' >> identifier
+
+identifier :: Parser Expression
+identifier = Identifier <$> (quotedString <|> unquotedString)
 
 unquotedString :: Parser Text
 unquotedString = pack <$> many alphaNumChar

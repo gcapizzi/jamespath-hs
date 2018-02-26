@@ -4,4 +4,4 @@ module JMESPath.Ast
 
 import Data.Text
 
-newtype Expression = Identifier Text
+data Expression = Identifier Text | SubExpression Expression Expression
