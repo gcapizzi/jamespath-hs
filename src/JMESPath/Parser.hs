@@ -18,6 +18,7 @@ expression :: Parser Expression
 expression = do
     id <- identifier
     subs <- many subExpression
+    eof
     return $ foldl SubExpression id subs
 
 subExpression :: Parser Expression
