@@ -18,12 +18,6 @@ search query document = do
     return $ encode foundValue
 
 searchValue :: Expression -> Value -> Either String Value
-searchValue (Identifier identifier) document = Right foundValue
-  where
-    foundValue = HashMap.lookupDefault Null identifier object
-    object = case document of
-        Object o -> o
-        _        -> HashMap.empty
-searchValue (SubExpression left right) document = do
-    leftEval <- searchValue left document
-    searchValue right leftEval
+searchValue (Identifier identifier) (Object object) = Right $ HashMap.lookupDefault Null identifier object
+searchValue (SubExpression left right) document = searchValue left document >>= searchValue right
+searchValue _ _ = Right Null
