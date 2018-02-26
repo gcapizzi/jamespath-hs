@@ -6,8 +6,8 @@ import JMESPath.Core
 import JMESPath.Parser
 
 import Data.Aeson
-import Data.ByteString.Lazy
-import Data.Text
+import Data.ByteString.Lazy (ByteString)
+import Data.Text (Text)
 
 search :: Text -> ByteString -> Either String ByteString
 search query document = do
