@@ -28,6 +28,7 @@ library:
   - text
   - unordered-containers
   - megaparsec
+  - vector
 
 executables:
   jp:

@@ -38,3 +38,10 @@ main = hspec $
         search "foo.\"bar\"" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "\"value\""
         search "foo.baz" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "null"
         search "foo.bar.baz" "{\"foo\": {\"bar\": {\"baz\": \"value\"}}}" `shouldBe` Right "\"value\""
+
+    context "with an index expression" $
+      it "returns the nth value of a list" $ do
+        search "[0]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"foo\""
+        search "[1]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"bar\""
+        search "[2]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"baz\""
+        search "[3]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "null"

@@ -17,10 +17,16 @@ type Parser = Parsec Void Text
 
 expression :: Parser Expression
 expression = do
-    id <- identifier
+    first <- indexExpression <|> identifier
     subs <- many subExpression
     eof
-    return $ foldl SubExpression id subs
+    return $ foldl SubExpression first subs
+
+indexExpression :: Parser Expression
+indexExpression = IndexExpression <$> between (char '[') (char ']') int
+
+int :: Parser Int
+int = read <$> some digitChar
 
 subExpression :: Parser Expression
 subExpression = char '.' >> identifier
