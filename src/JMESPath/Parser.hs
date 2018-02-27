@@ -25,6 +25,15 @@ lexeme = L.lexeme spaceConsumer
 dot :: Parser (Tokens Text)
 dot = L.symbol spaceConsumer "."
 
+int :: Parser Int
+int = lexeme L.decimal
+
+openSquare :: Parser (Tokens Text)
+openSquare = L.symbol spaceConsumer "["
+
+closedSquare :: Parser (Tokens Text)
+closedSquare = L.symbol spaceConsumer "]"
+
 unescapedChar :: Parser Char
 unescapedChar = noneOf ['"', '\\']
 
@@ -56,10 +65,7 @@ subExpression :: Parser Expression
 subExpression = dot >> identifier
 
 indexExpression :: Parser Expression
-indexExpression = IndexExpression <$> between (char '[') (char ']') int
-
-int :: Parser Int
-int = read <$> some digitChar
+indexExpression = IndexExpression <$> between openSquare closedSquare int
 
 expression :: Parser Expression
 expression = do

@@ -50,6 +50,5 @@ main = hspec $
     context "with an index expression" $
       it "returns the nth value of a list" $ do
         search "[0]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"foo\""
-        search "[1]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"bar\""
-        search "[2]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"baz\""
+        search "[ 1 ]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"bar\""
         search "[3]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "null"
