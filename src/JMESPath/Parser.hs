@@ -12,6 +12,7 @@ import Data.Void
 import Numeric
 import Text.Megaparsec
 import Text.Megaparsec.Char
+import qualified Text.Megaparsec.Char.Lexer as L
 
 type Parser = Parsec Void Text
 
@@ -29,10 +30,10 @@ int :: Parser Int
 int = read <$> some digitChar
 
 subExpression :: Parser Expression
-subExpression = char '.' >> identifier
+subExpression = dot >> identifier
 
 identifier :: Parser Expression
-identifier = Identifier <$> (quotedString <|> unquotedString)
+identifier = lexeme $ Identifier <$> (quotedString <|> unquotedString)
 
 unquotedString :: Parser Text
 unquotedString = T.cons <$> (letterChar <|> char '_') <*> (T.pack <$> many (alphaNumChar <|> char '_'))
@@ -57,6 +58,15 @@ escapedChar = char '\\' >>
 
 hexToChar :: String -> Char
 hexToChar = chr . fst . head . readHex
+
+dot :: Parser (Tokens Text)
+dot = L.symbol spaceConsumer "."
+
+lexeme :: Parser a -> Parser a
+lexeme = L.lexeme spaceConsumer
+
+spaceConsumer :: Parser ()
+spaceConsumer = L.space space1 empty empty
 
 parseExpression :: Text -> Either String Expression
 parseExpression expressionText = first parseErrorPretty $ parse expression "" expressionText

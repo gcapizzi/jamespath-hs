@@ -37,6 +37,7 @@ main = hspec $
         search "foo.bar" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "\"value\""
         search "foo.\"bar\"" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "\"value\""
         search "foo.bar.baz" "{\"foo\": {\"bar\": {\"baz\": \"value\"}}}" `shouldBe` Right "\"value\""
+        search "foo\n.\nbar\n.baz" "{\"foo\": {\"bar\": {\"baz\": \"value\"}}}" `shouldBe` Right "\"value\""
 
       context "when the key does not exist" $
         it "returns null" $
