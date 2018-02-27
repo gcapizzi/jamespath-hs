@@ -32,12 +32,19 @@ main = hspec $
           it "fails" $
             search "\"\"" "{\"\": \"value\"}" `shouldSatisfy` isLeft
 
-    context "with a sub-expression" $
+    context "with a sub-expression" $ do
       it "returns the corresponding value" $ do
         search "foo.bar" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "\"value\""
         search "foo.\"bar\"" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "\"value\""
-        search "foo.baz" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "null"
         search "foo.bar.baz" "{\"foo\": {\"bar\": {\"baz\": \"value\"}}}" `shouldBe` Right "\"value\""
+
+      context "when the key does not exist" $
+        it "returns null" $
+          search "foo.baz" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "null"
+
+      context "when the expression does not return an object" $
+        it "returns null" $
+          search "foo.bar.baz" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "null"
 
     context "with an index expression" $
       it "returns the nth value of a list" $ do
