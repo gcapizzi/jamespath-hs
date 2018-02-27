@@ -16,30 +16,14 @@ import qualified Text.Megaparsec.Char.Lexer as L
 
 type Parser = Parsec Void Text
 
-expression :: Parser Expression
-expression = do
-    first <- indexExpression <|> identifier
-    subs <- many subExpression
-    eof
-    return $ foldl SubExpression first subs
+spaceConsumer :: Parser ()
+spaceConsumer = L.space space1 empty empty
 
-indexExpression :: Parser Expression
-indexExpression = IndexExpression <$> between (char '[') (char ']') int
+lexeme :: Parser a -> Parser a
+lexeme = L.lexeme spaceConsumer
 
-int :: Parser Int
-int = read <$> some digitChar
-
-subExpression :: Parser Expression
-subExpression = dot >> identifier
-
-identifier :: Parser Expression
-identifier = lexeme $ Identifier <$> (quotedString <|> unquotedString)
-
-unquotedString :: Parser Text
-unquotedString = T.cons <$> (letterChar <|> char '_') <*> (T.pack <$> many (alphaNumChar <|> char '_'))
-
-quotedString :: Parser Text
-quotedString = T.pack <$> between (char '"') (char '"') (some (unescapedChar <|> escapedChar))
+dot :: Parser (Tokens Text)
+dot = L.symbol spaceConsumer "."
 
 unescapedChar :: Parser Char
 unescapedChar = noneOf ['"', '\\']
@@ -59,14 +43,30 @@ escapedChar = char '\\' >>
 hexToChar :: String -> Char
 hexToChar = chr . fst . head . readHex
 
-dot :: Parser (Tokens Text)
-dot = L.symbol spaceConsumer "."
+unquotedString :: Parser Text
+unquotedString = T.cons <$> (letterChar <|> char '_') <*> (T.pack <$> many (alphaNumChar <|> char '_'))
 
-lexeme :: Parser a -> Parser a
-lexeme = L.lexeme spaceConsumer
+quotedString :: Parser Text
+quotedString = T.pack <$> between (char '"') (char '"') (some (unescapedChar <|> escapedChar))
 
-spaceConsumer :: Parser ()
-spaceConsumer = L.space space1 empty empty
+identifier :: Parser Expression
+identifier = lexeme $ Identifier <$> (quotedString <|> unquotedString)
+
+subExpression :: Parser Expression
+subExpression = dot >> identifier
+
+indexExpression :: Parser Expression
+indexExpression = IndexExpression <$> between (char '[') (char ']') int
+
+int :: Parser Int
+int = read <$> some digitChar
+
+expression :: Parser Expression
+expression = do
+    first <- indexExpression <|> identifier
+    subs <- many subExpression
+    eof
+    return $ foldl SubExpression first subs
 
 parseExpression :: Text -> Either String Expression
 parseExpression expressionText = first parseErrorPretty $ parse expression "" expressionText
