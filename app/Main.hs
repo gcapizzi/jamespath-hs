@@ -5,6 +5,7 @@ import qualified Data.ByteString.Lazy.Char8 as B
 import Data.Either
 import qualified Data.Text as T
 import System.Environment
+import System.IO
 
 import JMESPath
 
@@ -14,6 +15,6 @@ main = do
     let query = T.pack $ head args
     document <- B.getContents
     let result = search query document
-    if isLeft result
-    then putStrLn $ fromLeft "" result
-    else B.putStrLn $ fromRight B.empty result
+    if isRight result
+    then B.putStrLn $ fromRight B.empty result
+    else hPutStrLn stderr $ fromLeft "" result
