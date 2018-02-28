@@ -47,8 +47,13 @@ main = hspec $
         it "returns null" $
           search "foo.bar.baz" "{\"foo\": {\"bar\": \"value\"}}" `shouldBe` Right "null"
 
-    context "with an index expression" $
+    context "with an index expression" $ do
       it "returns the nth value of a list" $ do
         search "[0]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"foo\""
         search "[ 1 ]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"bar\""
         search "[3]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "null"
+
+      context "when the index is negative" $
+        it "returns the nth to last value of a list" $ do
+          search "[-1]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"baz\""
+          search "[-4]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "null"

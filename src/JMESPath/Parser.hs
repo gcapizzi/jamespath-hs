@@ -19,14 +19,17 @@ type Parser = Parsec Void Text
 spaceConsumer :: Parser ()
 spaceConsumer = L.space space1 empty empty
 
+noSpaceConsumer :: Parser ()
+noSpaceConsumer = L.space empty empty empty
+
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme spaceConsumer
 
 dot :: Parser (Tokens Text)
 dot = L.symbol spaceConsumer "."
 
-int :: Parser Int
-int = lexeme L.decimal
+signedInt :: Parser Int
+signedInt = L.signed noSpaceConsumer $ lexeme L.decimal
 
 openSquare :: Parser (Tokens Text)
 openSquare = L.symbol spaceConsumer "["
@@ -65,7 +68,7 @@ subExpression :: Parser Expression
 subExpression = dot >> identifier
 
 indexExpression :: Parser Expression
-indexExpression = IndexExpression <$> between openSquare closedSquare int
+indexExpression = IndexExpression <$> between openSquare closedSquare signedInt
 
 expression :: Parser Expression
 expression = do
