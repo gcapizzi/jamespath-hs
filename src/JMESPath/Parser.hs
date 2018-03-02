@@ -64,18 +64,23 @@ quotedString = T.pack <$> between (char '"') (char '"') (some (unescapedChar <|>
 identifier :: Parser Expression
 identifier = lexeme $ Identifier <$> (quotedString <|> unquotedString)
 
-subExpression :: Parser Expression
-subExpression = dot >> identifier
+selector :: Parser (Expression -> Expression)
+selector = flip SubExpression <$> identifier
 
-indexExpression :: Parser Expression
-indexExpression = IndexExpression <$> between openSquare closedSquare signedInt
+subExpression :: Parser (Expression -> Expression)
+subExpression = dot >> selector
+
+indexExpression :: Parser (Expression -> Expression)
+indexExpression = flip IndexExpression <$> between openSquare closedSquare signedInt
 
 expression :: Parser Expression
 expression = do
-    first <- indexExpression <|> identifier
-    subs <- many subExpression
+    first <- selector <|> indexExpression
+    subs <- many (subExpression <|> indexExpression)
     eof
-    return $ foldl SubExpression first subs
+    return $ foldl (|>) Root (first:subs)
+
+(|>) = flip ($)
 
 parseExpression :: Text -> Either String Expression
 parseExpression expressionText = first parseErrorPretty $ parse expression "" expressionText
