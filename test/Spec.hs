@@ -57,3 +57,7 @@ main = hspec $
         it "returns the nth to last value of a list" $ do
           search "[-1]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "\"baz\""
           search "[-4]" "[\"foo\", \"bar\", \"baz\"]" `shouldBe` Right "null"
+
+    context "with sub-expressions and index expressions" $
+      it "works" $
+        search "foo[0].bar.baz[1]" "{\"foo\": [{\"bar\": {\"baz\": [false, \"value\"]}}]}" `shouldBe` Right "\"value\""
