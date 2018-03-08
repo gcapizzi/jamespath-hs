@@ -27,6 +27,7 @@ main = hspec $
           search "\"special chars: !@#\"" "{\"special chars: !@#\": \"value\"}" `shouldBe` Right "\"value\""
           search "\"\\\"\\b\\f\\n\\r\\t\"" "{\"\\\"\\b\\f\\n\\r\\t\": \"value\"}" `shouldBe` Right "\"value\""
           search "\"\\u2713\"" "{\"\\u2713\": \"value\"}" `shouldBe` Right "\"value\""
+          search "\"\\t4\\u2713\\ud9da\\udd15\"" "{\"\\t4\\u2713\\ud9da\\udd15\": true}" `shouldBe` Right "true"
 
         context "when the identifier is an empty string" $
           it "fails" $

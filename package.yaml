@@ -29,6 +29,7 @@ library:
   - unordered-containers
   - megaparsec
   - vector
+  - split
 
 executables:
   jp:
