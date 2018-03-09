@@ -17,17 +17,21 @@ data Expression = Root
 
 searchValue :: Expression -> Value -> Either String Value
 searchValue (SubExpression Root (Identifier identifier)) document = Right $ getKey identifier document
-searchValue (SubExpression expression (Identifier identifier)) document = searchValue expression document >>= Right <$> getKey identifier
+searchValue (SubExpression expression (Identifier identifier)) document = do
+    leftValue <- searchValue expression document
+    Right $ getKey identifier leftValue
 searchValue (IndexExpression Root index) document = Right $ getIndex index document
-searchValue (IndexExpression expression index) document = searchValue expression document >>= Right <$> getIndex index
+searchValue (IndexExpression expression index) document = do
+    leftValue <- searchValue expression document
+    Right $ getIndex index leftValue
 searchValue _ _ = Right Null
+
+getKey :: Text -> Value -> Value
+getKey key (Object object) = lookupDefault Null key object
+getKey _ _ = Null
 
 getIndex :: Int -> Value -> Value
 getIndex index (Array array) = fromMaybe Null $ array V.!? normalizedIndex
   where
     normalizedIndex = if index < 0 then V.length array + index else index
 getIndex _ _ = Null
-
-getKey :: Text -> Value -> Value
-getKey key (Object object) = lookupDefault Null key object
-getKey _ _ = Null
