@@ -6,7 +6,6 @@ import JMESPath.Core
 
 import Data.Bifunctor
 import qualified Data.ByteString as B
-import Data.Char
 import Data.List.Split
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -65,7 +64,7 @@ hexToWord8s :: String -> [Word8]
 hexToWord8s = map hexToWord8 . chunksOf 2
 
 hexToWord8 :: String -> Word8
-hexToWord8 = fromIntegral . fst . head . readHex
+hexToWord8 = fst . head . readHex
 
 unquotedString :: Parser Text
 unquotedString = T.cons <$> (letterChar <|> char '_') <*> (T.pack <$> many (alphaNumChar <|> char '_'))
@@ -87,11 +86,12 @@ indexExpression = flip IndexExpression <$> between openSquare closedSquare signe
 
 expression :: Parser Expression
 expression = do
-    first <- selector <|> indexExpression
-    subs <- many (subExpression <|> indexExpression)
+    firstExpression <- selector <|> indexExpression
+    followingExpressions <- many (subExpression <|> indexExpression)
     eof
-    return $ foldl (|>) Root (first:subs)
+    return $ foldl (|>) Root (firstExpression:followingExpressions)
 
+(|>) :: a -> (a -> b) -> b
 (|>) = flip ($)
 
 parseExpression :: Text -> Either String Expression
