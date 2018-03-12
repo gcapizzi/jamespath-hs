@@ -4,14 +4,14 @@ module JMESPath
 
 import JMESPath.Core
 import JMESPath.Parser
+import JMESPath.Json
 
-import Data.Aeson
-import Data.ByteString.Lazy (ByteString)
 import Data.Text (Text)
+import Data.ByteString.Lazy (ByteString)
 
 search :: Text -> ByteString -> Either String ByteString
 search query document = do
     queryExpression <- parseExpression query
-    documentValue <- eitherDecode document :: Either String Value
+    documentValue <- decode document
     foundValue <- searchValue queryExpression documentValue
     return $ encode foundValue
