@@ -76,13 +76,13 @@ identifier :: Parser Expression
 identifier = lexeme $ Identifier <$> (quotedString <|> unquotedString)
 
 selector :: Parser (Expression -> Expression)
-selector = flip SubExpression <$> identifier
+selector = SubExpression <$> identifier
 
 subExpression :: Parser (Expression -> Expression)
 subExpression = dot >> selector
 
 indexExpression :: Parser (Expression -> Expression)
-indexExpression = flip IndexExpression <$> between openSquare closedSquare signedInt
+indexExpression = IndexExpression <$> between openSquare closedSquare signedInt
 
 expression :: Parser Expression
 expression = do
