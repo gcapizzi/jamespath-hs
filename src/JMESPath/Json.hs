@@ -33,6 +33,7 @@ getIndex :: Int -> Value -> Value
 getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null $ array Vector.!? normalizedIndex
   where
     normalizedIndex = if index < 0 then Vector.length array + index else index
+getIndex _ _ = nullValue
 
 nullValue :: Value
 nullValue = Value Aeson.Null
