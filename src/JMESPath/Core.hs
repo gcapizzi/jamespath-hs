@@ -3,16 +3,8 @@ module JMESPath.Core
     , Expression (..)
     ) where
 
+import JMESPath.Ast
 import qualified JMESPath.Json as Json
-
-import Data.Text (Text)
-
-data Expression = Root
-                | Identifier Text
-                | SubExpression Expression Expression
-                | IndexExpression Int Expression
-                | ProjectExpression Expression Expression
-    deriving Show
 
 searchValue :: Expression -> Json.Value -> Json.Value
 searchValue Root document = document

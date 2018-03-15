@@ -2,7 +2,7 @@ module JMESPath.Parser
     ( parseExpression
     ) where
 
-import JMESPath.Core
+import JMESPath.Ast
 
 import Data.Bifunctor
 import qualified Data.ByteString as B
