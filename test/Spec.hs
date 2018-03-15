@@ -62,3 +62,13 @@ main = hspec $
     context "with sub-expressions and index expressions" $
       it "works" $
         search "foo[0].bar.baz[1]" "{\"foo\": [{\"bar\": {\"baz\": [false, \"value\"]}}]}" `shouldBe` Right "\"value\""
+
+    context "with a projection" $
+      it "applies the following expressions to each element of a list" $ do
+        search "[*]" "[{\"bar\": 1}, {\"bar\": 2}, {\"bar\": 3}]" `shouldBe` Right "[{\"bar\":1},{\"bar\":2},{\"bar\":3}]"
+        search "[*].bar" "[{\"bar\": 1}, {\"bar\": 2}, {\"bar\": 3}]" `shouldBe` Right "[1,2,3]"
+        search "[*].bar" "[{\"bar\": 1}, {\"bar\": 2}, {\"notbar\": 3}]" `shouldBe` Right "[1,2]"
+        search "foo[*].bar" "{\"foo\": [{\"bar\": 1}, {\"bar\": 2}, {\"bar\": 3}]}" `shouldBe` Right "[1,2,3]"
+        search "foo[*].bar" "{\"foo\": [{\"bar\": 1}, {\"bar\": 2}, {\"notbar\": 3}]}" `shouldBe` Right "[1,2]"
+        search "foo[*].bar[0]" "{\"foo\": [{\"bar\": [1]}, {\"bar\": [2]}, {\"bar\": [3]}]}" `shouldBe` Right "[1,2,3]"
+        search "a[*].b[*].c" "{\"a\": [{\"b\": [{\"c\": 1}, {\"c\": 2}]}, {\"b\": [{\"c\": 3}]}]}" `shouldBe` Right "[[1,2],[3]]"

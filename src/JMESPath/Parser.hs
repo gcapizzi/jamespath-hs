@@ -7,6 +7,7 @@ import JMESPath.Core
 import Data.Bifunctor
 import qualified Data.ByteString as B
 import Data.List.Split
+import Data.Maybe
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -39,6 +40,12 @@ openSquare = L.symbol spaceConsumer "["
 
 closedSquare :: Parser (Tokens Text)
 closedSquare = L.symbol spaceConsumer "]"
+
+star :: Parser (Tokens Text)
+star = L.symbol spaceConsumer "*"
+
+wildcard :: Parser (Tokens Text)
+wildcard = between openSquare closedSquare star 
 
 unescapedChar :: Parser Text
 unescapedChar = T.singleton <$> noneOf ['"', '\\']
@@ -84,12 +91,23 @@ subExpression = dot >> selector
 indexExpression :: Parser (Expression -> Expression)
 indexExpression = IndexExpression <$> between openSquare closedSquare signedInt
 
+firstInnerExpression :: Parser Expression
+firstInnerExpression = do
+    firstExpression <- selector <|> try indexExpression
+    followingExpressions <- many (subExpression <|> try indexExpression)
+    return $ foldl (|>) Root (firstExpression:followingExpressions)
+
+innerExpression :: Parser Expression
+innerExpression = do
+    expressions <- many (subExpression <|> try indexExpression)
+    return $ foldl (|>) Root expressions
+
 expression :: Parser Expression
 expression = do
-    firstExpression <- selector <|> indexExpression
-    followingExpressions <- many (subExpression <|> indexExpression)
+    e <- fromMaybe Root <$> optional firstInnerExpression
+    es <- many (wildcard >> innerExpression)
     eof
-    return $ foldl (|>) Root (firstExpression:followingExpressions)
+    return $ foldr1 ProjectExpression (e:es)
 
 (|>) :: a -> (a -> b) -> b
 (|>) = flip ($)
