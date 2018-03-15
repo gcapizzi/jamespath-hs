@@ -13,5 +13,5 @@ search :: Text -> ByteString -> Either String ByteString
 search query document = do
     queryExpression <- parseExpression query
     documentValue <- decode document
-    foundValue <- searchValue queryExpression documentValue
+    let foundValue = searchValue queryExpression documentValue
     return $ encode foundValue
