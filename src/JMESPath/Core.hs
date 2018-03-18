@@ -6,12 +6,18 @@ module JMESPath.Core
 import JMESPath.Ast
 import qualified JMESPath.Json as Json
 
-searchValue :: Expression -> Json.Value -> Json.Value
-searchValue Root document = document
-searchValue (SubExpression (Identifier identifier) Root) document = Json.getKey identifier document
-searchValue (SubExpression (Identifier identifier) expression) document = Json.getKey identifier (searchValue expression document)
-searchValue (IndexExpression index Root) document = Json.getIndex index document
-searchValue (IndexExpression index expression) document = Json.getIndex index (searchValue expression document)
+searchValue :: Expression -> Json.Value -> Either String Json.Value
+searchValue Root document = Right document
+searchValue (SubExpression (Identifier identifier) Root) document = Right $ Json.getKey identifier document
+searchValue (SubExpression (Identifier identifier) expression) document = do
+    value <- searchValue expression document
+    Right $ Json.getKey identifier value
+searchValue (IndexExpression index Root) document = Right $ Json.getIndex index document
+searchValue (IndexExpression index expression) document = do
+    value <- searchValue expression document
+    Right $ Json.getIndex index value
 searchValue (ProjectExpression Root expression) document = Json.mapValue (searchValue expression) document
-searchValue (ProjectExpression left right) document = Json.mapValue (searchValue right) (searchValue left document)
-searchValue _ _ = Json.nullValue
+searchValue (ProjectExpression left right) document = do
+    value <- searchValue left document
+    Json.mapValue (searchValue right) value
+searchValue _ _ = Right Json.nullValue

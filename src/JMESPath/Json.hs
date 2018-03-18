@@ -36,12 +36,12 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
     normalizedIndex = if index < 0 then Vector.length array + index else index
 getIndex _ _ = nullValue
 
-mapValue :: (Value -> Value) -> Value -> Value
-mapValue f (Value (Aeson.Array array)) = Value $ Aeson.Array result
-  where
-    result = Vector.filter (/= Aeson.Null) resultWithNulls
-    resultWithNulls = Vector.map (toAeson . f . fromAeson) array
-mapValue _ _ = nullValue
+mapValue :: Monad m => (Value -> m Value) -> Value -> m Value
+mapValue f (Value (Aeson.Array array)) = do
+    resultWithNulls <- Vector.mapM (fmap toAeson . f . fromAeson) array
+    let result = Vector.filter (/= Aeson.Null) resultWithNulls
+    return $ Value $ Aeson.Array result
+mapValue _ _ = return nullValue
 
 fromAeson :: Aeson.Value -> Value
 fromAeson = Value
