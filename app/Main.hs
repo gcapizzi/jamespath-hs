@@ -1,9 +1,9 @@
 module Main where
 
-import qualified Data.ByteString.Lazy as B hiding (putStrLn)
-import qualified Data.ByteString.Lazy.Char8 as B
+import qualified Data.ByteString.Lazy as ByteString
+import qualified Data.ByteString.Lazy.Char8 as ByteString.Char8
 import Data.Either
-import qualified Data.Text as T
+import qualified Data.Text as Text
 import System.Environment
 import System.IO
 
@@ -12,9 +12,9 @@ import JMESPath
 main :: IO ()
 main = do
     args <- getArgs
-    let query = T.pack $ head args
-    document <- B.getContents
+    let query = Text.pack $ head args
+    document <- ByteString.getContents
     let result = search query document
     if isRight result
-    then B.putStrLn $ fromRight B.empty result
+    then ByteString.Char8.putStrLn $ fromRight ByteString.empty result
     else hPutStrLn stderr $ fromLeft "" result
