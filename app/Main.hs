@@ -3,7 +3,6 @@ module Main where
 import qualified Data.ByteString.Lazy as ByteString
 import qualified Data.ByteString.Lazy.Char8 as ByteString.Char8
 import Data.Either
-import qualified Data.Text as Text
 import System.Environment
 import System.IO
 
@@ -12,7 +11,7 @@ import JMESPath
 main :: IO ()
 main = do
     args <- getArgs
-    let query = Text.pack $ head args
+    let query = head args
     document <- ByteString.getContents
     let result = search query document
     if isRight result

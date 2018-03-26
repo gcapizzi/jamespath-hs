@@ -18,7 +18,7 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
-type Parser = Parsec Void Text
+type Parser = Parsec Void String
 
 spaceConsumer :: Parser ()
 spaceConsumer = L.space space1 empty empty
@@ -29,22 +29,22 @@ noSpaceConsumer = L.space empty empty empty
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme spaceConsumer
 
-dot :: Parser (Tokens Text)
+dot :: Parser (Tokens String)
 dot = L.symbol spaceConsumer "."
 
 signedInt :: Parser Int
 signedInt = L.signed noSpaceConsumer $ lexeme L.decimal
 
-openSquare :: Parser (Tokens Text)
+openSquare :: Parser (Tokens String)
 openSquare = L.symbol spaceConsumer "["
 
-closedSquare :: Parser (Tokens Text)
+closedSquare :: Parser (Tokens String)
 closedSquare = L.symbol spaceConsumer "]"
 
-star :: Parser (Tokens Text)
+star :: Parser (Tokens String)
 star = L.symbol spaceConsumer "*"
 
-wildcard :: Parser (Tokens Text)
+wildcard :: Parser (Tokens String)
 wildcard = between openSquare closedSquare star 
 
 unescapedChar :: Parser Text
@@ -112,5 +112,5 @@ expression = do
 (|>) :: a -> (a -> b) -> b
 (|>) = flip ($)
 
-parseExpression :: Text -> Either String Expression
+parseExpression :: String -> Either String Expression
 parseExpression expressionText = first parseErrorPretty $ parse expression "" expressionText
