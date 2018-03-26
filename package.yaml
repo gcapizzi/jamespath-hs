@@ -28,9 +28,14 @@ library:
   - aeson
   - text
   - unordered-containers
-  - megaparsec
   - vector
-  - split
+  - array
+  build-tools:
+  - alex
+  - happy
+  other-modules:
+  - JMESPath.Lexer
+  - JMESPath.Parser
 
 executables:
   jp:
