@@ -15,7 +15,7 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
 import qualified Data.Vector as Vector
 
-newtype Value = Value Aeson.Value
+newtype Value = Value Aeson.Value deriving Show
 
 decode :: ByteString -> Either String Value
 decode document = Value <$> (Aeson.eitherDecode document :: Either String Aeson.Value)
