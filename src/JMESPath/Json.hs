@@ -12,6 +12,7 @@ module JMESPath.Json
 
 import Data.ByteString.Lazy (ByteString)
 import Data.Text (Text)
+import Data.Vector (Vector)
 import qualified Data.Aeson as Aeson
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
@@ -39,18 +40,20 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
 getIndex _ _ = nullValue
 
 mapArray :: Monad m => (Value -> m Value) -> Value -> m Value
-mapArray f (Value (Aeson.Array array)) = do
-    resultWithNulls <- Vector.mapM (fmap toAeson . f . fromAeson) array
-    let result = Vector.filter (/= Aeson.Null) resultWithNulls
-    return $ Value $ Aeson.Array result
+mapArray f (Value (Aeson.Array array)) = Value <$> mapValues (fmap toAeson . f . fromAeson) array
 mapArray _ _ = return nullValue
 
 mapObject :: Monad m => (Value -> m Value) -> Value -> m Value
-mapObject f (Value (Aeson.Object object)) = do
-    resultWithNulls <- mapM (fmap toAeson . f . fromAeson) (HashMap.elems object)
-    let result = filter (/= Aeson.Null) resultWithNulls
-    return $ Value $ Aeson.Array $ Vector.fromList result
+mapObject f (Value (Aeson.Object object)) = Value <$> mapValues (fmap toAeson . f . fromAeson) elems
+  where
+    elems = Vector.fromList $ HashMap.elems object
 mapObject _ _ = return nullValue
+
+mapValues :: Monad m => (Aeson.Value -> m Aeson.Value) -> Vector Aeson.Value -> m Aeson.Value
+mapValues f values = do
+    resultWithNulls <- Vector.mapM f values
+    let result = Vector.filter (/= Aeson.Null) resultWithNulls
+    return $ Aeson.Array result
 
 flatMap :: Monad m => (Value -> m Value) -> Value -> m Value
 flatMap f value = flattenArray <$> mapArray f value
