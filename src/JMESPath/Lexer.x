@@ -35,14 +35,23 @@ data Token
   | TokenOpenSquare
   | TokenClosedSquare
   | TokenStar
-  deriving (Eq, Show)
+  deriving (Eq)
+
+instance Show Token where
+  show (TokenUnquotedString s) = s
+  show (TokenQuotedString s) = s
+  show (TokenNumber n) = show n
+  show (TokenDot) = "."
+  show (TokenOpenSquare) = "["
+  show (TokenClosedSquare) = "]"
+  show (TokenStar) = "*"
 
 scanTokens :: String -> Either String [Token]
 scanTokens input = go ('\n', [], input)
   where
     go inp@(_, _, str) = case alexScan inp 0 of
         AlexEOF -> return []
-        AlexError _ -> Left "Invalid lexeme."
+        AlexError (_, _, rst) -> Left ("Syntax error: unexpected input '" ++ rst ++ "'")
         AlexSkip inp' _ -> go inp'
         AlexToken inp' len act -> do
             res <- go inp'

@@ -69,8 +69,8 @@ String : UNQUOTED_STRING { Text.pack $1 }
 
 {
 parseError :: [Token] -> Either String a
-parseError (l:ls) = Left (show l)
-parseError [] = Left "Unexpected end of Input"
+parseError (l:ls) = Left ("Syntax error: unexpected token '" ++ show l ++ "'")
+parseError [] = Left "Syntax error: unexpected end of input"
 
 parseExpression :: String -> Either String Expression
 parseExpression input = do

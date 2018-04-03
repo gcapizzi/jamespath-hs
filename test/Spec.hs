@@ -7,6 +7,12 @@ import JMESPath
 main :: IO ()
 main = hspec $
   describe "JMESPath.search" $ do
+    context "when syntax is invalid" $
+      it "fails" $ do
+        search "&foo" "{}" `shouldBe` Left "Syntax error: unexpected input '&foo'"
+        search "" "{}" `shouldBe` Left "Syntax error: unexpected end of input"
+        search ".foo" "{}" `shouldBe` Left "Syntax error: unexpected token '.'"
+
     context "with an identifier" $ do
       it "returns the value of the corresponding field in the input object" $ do
         search "a" "{\"a\": \"foo\", \"b\": \"bar\", \"c\": \"baz\"}" `shouldBe` Right "\"foo\""
