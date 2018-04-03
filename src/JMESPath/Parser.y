@@ -34,12 +34,23 @@ import JMESPath.Ast
 %%
 
 Expression : FirstSimpleExpression { $1 }
-           | FirstSimpleExpression '[' '*' ']' RestExpression { ProjectExpression $1 $5 }
-           | '[' '*' ']' { ProjectExpression Root Root }
-           | '[' '*' ']' RestExpression { ProjectExpression Root $4 }
+           | FirstSimpleExpression '[' '*' ']' RestExpression { ArrayProjectExpression $1 $5 }
+           | FirstSimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
+           | FirstSimpleExpression '.' '*' RestExpression { ObjectProjectExpression $1 $4 }
+           | FirstSimpleExpression '.' '*' { ObjectProjectExpression $1 Root }
+           | '[' '*' ']' { ArrayProjectExpression Root Root }
+           | '*' { ObjectProjectExpression Root Root }
+           | '[' '*' ']' RestExpression { ArrayProjectExpression Root $4 }
+           | '*' RestExpression { ObjectProjectExpression Root $2 }
 
 RestExpression : SimpleExpression { $1 }
-               | SimpleExpression '[' '*' ']' RestExpression { ProjectExpression $1 $5 }
+               | SimpleExpression '[' '*' ']' RestExpression { ArrayProjectExpression $1 $5 }
+               | SimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
+               | SimpleExpression '.' '*' RestExpression { ObjectProjectExpression $1 $4 }
+               | '[' '*' ']' RestExpression { ArrayProjectExpression Root $4 }
+               | '.' '*' RestExpression { ObjectProjectExpression Root $3 }
+               | '[' '*' ']' { ArrayProjectExpression Root Root }
+               | '.' '*' { ObjectProjectExpression Root Root }
 
 SimpleExpression : '.' Identifier { SubExpression $2 Root }
                  | SimpleExpression '.' Identifier { SubExpression $3 $1 }

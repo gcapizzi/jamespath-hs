@@ -4,7 +4,8 @@ module JMESPath.Json
   , encode
   , getKey
   , getIndex
-  , mapValue
+  , mapArray
+  , mapObject
   , nullValue
   ) where
 
@@ -36,12 +37,19 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
     normalizedIndex = if index < 0 then Vector.length array + index else index
 getIndex _ _ = nullValue
 
-mapValue :: Monad m => (Value -> m Value) -> Value -> m Value
-mapValue f (Value (Aeson.Array array)) = do
+mapArray :: Monad m => (Value -> m Value) -> Value -> m Value
+mapArray f (Value (Aeson.Array array)) = do
     resultWithNulls <- Vector.mapM (fmap toAeson . f . fromAeson) array
     let result = Vector.filter (/= Aeson.Null) resultWithNulls
     return $ Value $ Aeson.Array result
-mapValue _ _ = return nullValue
+mapArray _ _ = return nullValue
+
+mapObject :: Monad m => (Value -> m Value) -> Value -> m Value
+mapObject f (Value (Aeson.Object object)) = do
+    resultWithNulls <- mapM (fmap toAeson . f . fromAeson) (HashMap.elems object)
+    let result = filter (/= Aeson.Null) resultWithNulls
+    return $ Value $ Aeson.Array $ Vector.fromList result
+mapObject _ _ = return nullValue
 
 fromAeson :: Aeson.Value -> Value
 fromAeson = Value

@@ -16,8 +16,12 @@ searchValue (IndexExpression index Root) document = Right $ Json.getIndex index 
 searchValue (IndexExpression index expression) document = do
     value <- searchValue expression document
     Right $ Json.getIndex index value
-searchValue (ProjectExpression Root expression) document = Json.mapValue (searchValue expression) document
-searchValue (ProjectExpression left right) document = do
+searchValue (ArrayProjectExpression Root expression) document = Json.mapArray (searchValue expression) document
+searchValue (ArrayProjectExpression left right) document = do
     value <- searchValue left document
-    Json.mapValue (searchValue right) value
+    Json.mapArray (searchValue right) value
+searchValue (ObjectProjectExpression Root expression) document = Json.mapObject (searchValue expression) document
+searchValue (ObjectProjectExpression left right) document = do
+    value <- searchValue left document
+    Json.mapObject (searchValue right) value
 searchValue _ _ = Right Json.nullValue
