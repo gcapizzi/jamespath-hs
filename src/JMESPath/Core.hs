@@ -24,4 +24,8 @@ searchValue (ObjectProjectExpression Root expression) document = Json.mapObject 
 searchValue (ObjectProjectExpression left right) document = do
     value <- searchValue left document
     Json.mapObject (searchValue right) value
+searchValue (FlattenExpression Root expression) document = Json.flatMap (searchValue expression) document
+searchValue (FlattenExpression left right) document = do
+    value <- searchValue left document
+    Json.flatMap (searchValue right) value
 searchValue _ _ = Right Json.nullValue

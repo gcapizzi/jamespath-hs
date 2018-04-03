@@ -10,4 +10,5 @@ data Expression = Root
                 | IndexExpression Int Expression
                 | ArrayProjectExpression Expression Expression
                 | ObjectProjectExpression Expression Expression
+                | FlattenExpression Expression Expression
     deriving Show

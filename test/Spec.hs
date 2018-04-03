@@ -88,3 +88,17 @@ main = hspec $
         search "*[0]" "{\"a\": [1], \"b\": {}, \"c\": [3]}" `shouldBe` Right "[1,3]"
         search "foo.*[0]" "{\"foo\": {\"a\": [1], \"b\": [2], \"c\": [3]}}" `shouldBe` Right "[1,2,3]"
         search "foo.*[0].bar" "{\"foo\": {\"a\": [{\"bar\": 1}], \"b\": [{\"bar\": 2}]}}" `shouldBe` Right "[1,2]"
+
+    context "with a flattening expression" $
+      it "applies the following expressions to each element of a list, and flattens the result" $ do
+        search "[]" "[1, [2, 3], 4]" `shouldBe` Right "[1,2,3,4]"
+        search "[]" "[1, [2, null], 3, null]" `shouldBe` Right "[1,2,3]"
+        search "foo[]" "{\"foo\":[[1, 2, 3]]}" `shouldBe` Right "[1,2,3]"
+        search "foo[]" "{\"foo\":\"\"}" `shouldBe` Right "null"
+        search "[][0]" "[[[1]], [[2]], [[3]]]" `shouldBe` Right "[1,2,3]"
+        search "foo[][0]" "{\"foo\": [[[1]], [[2]], [[3]]]}" `shouldBe` Right "[1,2,3]"
+        search "foo[]" "{\"foo\":[[1, 2, 3]]}" `shouldBe` Right "[1,2,3]"
+        search "a[].b[]" "{\"a\": [{\"b\": [[1], [2]]}, {\"b\": [[3]]}]}" `shouldBe` Right "[1,2,3]"
+        search "a[].b[].c" "{\"a\": [{\"b\": [{\"c\": [1]}, {\"c\": [2]}]}, {\"b\": [{\"c\": [3]}]}]}" `shouldBe` Right "[1,2,3]"
+        search "foo[][]" "{\"foo\":[[1, 2, 3]]}" `shouldBe` Right "[1,2,3]"
+        search "foo[][].bar" "{\"foo\":[[{\"bar\": 1}, {\"bar\": 2}, {\"bar\": 3}]]}" `shouldBe` Right "[1,2,3]"

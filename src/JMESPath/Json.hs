@@ -6,6 +6,7 @@ module JMESPath.Json
   , getIndex
   , mapArray
   , mapObject
+  , flatMap
   , nullValue
   ) where
 
@@ -50,6 +51,17 @@ mapObject f (Value (Aeson.Object object)) = do
     let result = filter (/= Aeson.Null) resultWithNulls
     return $ Value $ Aeson.Array $ Vector.fromList result
 mapObject _ _ = return nullValue
+
+flatMap :: Monad m => (Value -> m Value) -> Value -> m Value
+flatMap f value = flattenArray <$> mapArray f value
+
+flattenArray :: Value -> Value
+flattenArray (Value (Aeson.Array array)) = Value $ Aeson.Array $ Vector.foldr f Vector.empty array
+  where
+    f (Aeson.Array subarray) acc = Vector.filter (/= Aeson.Null) subarray Vector.++ acc
+    f Aeson.Null acc = acc
+    f v acc = Vector.cons v acc
+flattenArray _ = nullValue
 
 fromAeson :: Aeson.Value -> Value
 fromAeson = Value
