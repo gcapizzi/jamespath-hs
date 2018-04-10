@@ -12,17 +12,10 @@ import JMESPath.Lexer
 import JMESPath.Ast
 }
 
--- Entry point
 %name expression
-
--- Lexer structure
 %tokentype { Token }
-
--- Parser monad
 %monad { Either String } { (>>=) } { return }
 %error { parseError }
-
--- Token Names
 %token
     UNQUOTED_STRING { TokenUnquotedString $$ }
     QUOTED_STRING { TokenQuotedString $$ }
