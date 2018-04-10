@@ -1,6 +1,7 @@
 import Test.Hspec
 
 import Data.Either
+import Data.List
 
 import JMESPath
 
@@ -11,7 +12,7 @@ main = hspec $
       it "fails" $ do
         search "&foo" "{}" `shouldBe` Left "Syntax error: unexpected input '&foo'"
         search "" "{}" `shouldBe` Left "Syntax error: unexpected end of input"
-        search ".foo" "{}" `shouldBe` Left "Syntax error: unexpected token '.'"
+        fromLeft "" (search ".foo" "{}") `shouldSatisfy` isPrefixOf "Syntax error: unexpected token '.'"
 
     context "with an identifier" $ do
       it "returns the value of the corresponding field in the input object" $ do

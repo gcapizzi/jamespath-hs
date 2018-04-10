@@ -4,6 +4,7 @@ module JMESPath.Parser (
 ) where
 
 import qualified Data.Aeson as Aeson
+import qualified Data.List as List
 import qualified Data.Text as Text
 import qualified Data.Text.Lazy as LazyText
 import qualified Data.Text.Lazy.Encoding as LaxyText.Encoding
@@ -16,6 +17,7 @@ import JMESPath.Ast
 %tokentype { Token }
 %monad { Either String } { (>>=) } { return }
 %error { parseError }
+%errorhandlertype explist
 %token
     UNQUOTED_STRING { TokenUnquotedString $$ }
     QUOTED_STRING { TokenQuotedString $$ }
@@ -69,9 +71,11 @@ String : UNQUOTED_STRING { Text.pack $1 }
        | QUOTED_STRING {% Aeson.eitherDecode $ LaxyText.Encoding.encodeUtf8 $ LazyText.pack $1 }
 
 {
-parseError :: [Token] -> Either String a
-parseError (l:ls) = Left ("Syntax error: unexpected token '" ++ show l ++ "'")
-parseError [] = Left "Syntax error: unexpected end of input"
+parseError :: ([Token], [String]) -> Either String a
+parseError (l:ls, exp) = Left ("Syntax error: unexpected token '" ++ show l ++ "', expected one of: " ++ commaSeparatedList exp)
+parseError ([], _) = Left "Syntax error: unexpected end of input"
+
+commaSeparatedList = List.concat . List.intersperse ", "
 
 parseExpression :: String -> Either String Expression
 parseExpression input = do
