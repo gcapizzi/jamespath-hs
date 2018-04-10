@@ -5,6 +5,7 @@ import qualified Data.ByteString.Lazy.Char8 as ByteString.Char8
 import Data.Either
 import System.Environment
 import System.IO
+import System.Exit
 
 import JMESPath
 
@@ -16,4 +17,6 @@ main = do
     let result = search query document
     if isRight result
     then ByteString.Char8.putStrLn $ fromRight ByteString.empty result
-    else hPutStrLn stderr $ fromLeft "" result
+    else do
+        hPutStrLn stderr $ fromLeft "" result
+        exitWith $ ExitFailure 1
