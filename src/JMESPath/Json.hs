@@ -56,7 +56,7 @@ mapValues f values = do
     return $ Aeson.Array result
 
 flatMap :: Monad m => (Value -> m Value) -> Value -> m Value
-flatMap f value = flattenArray <$> mapArray f value
+flatMap f value = mapArray f $ flattenArray value
 
 flattenArray :: Value -> Value
 flattenArray (Value (Aeson.Array array)) = Value $ Aeson.Array $ Vector.foldr f Vector.empty array

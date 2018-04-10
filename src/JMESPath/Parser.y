@@ -31,43 +31,34 @@ import JMESPath.Ast
     '[' { TokenOpenSquare }
     ']' { TokenClosedSquare }
     '*' { TokenStar }
+    '[]' { TokenOpenClosedSquare }
 %%
 
-Expression : FirstSimpleExpression { $1 }
+Expression : FirstExpressionWithProjections { $1 }
+           | '[]' { FlattenExpression Root Root }
+           | '[]' ExpressionWithProjections { FlattenExpression Root $2 }
+           | Expression '[]' { FlattenExpression $1 Root }
+           | Expression '[]' ExpressionWithProjections { FlattenExpression $1 $3 }
 
-           | '[' ']' { FlattenExpression Root Root }
-           | '[' '*' ']' { ArrayProjectExpression Root Root }
-           | '*' { ObjectProjectExpression Root Root }
+FirstExpressionWithProjections : FirstSimpleExpression { $1 }
+                               | '[' '*' ']' { ArrayProjectExpression Root Root }
+                               | '*' { ObjectProjectExpression Root Root }
+                               | '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression Root $4 }
+                               | '*' ExpressionWithProjections { ObjectProjectExpression Root $2 }
+                               | FirstSimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
+                               | FirstSimpleExpression '.' '*' { ObjectProjectExpression $1 Root }
+                               | FirstSimpleExpression '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression $1 $5 }
+                               | FirstSimpleExpression '.' '*' ExpressionWithProjections { ObjectProjectExpression $1 $4 }
 
-           | '[' ']' RestExpression { FlattenExpression Root $3 }
-           | '[' '*' ']' RestExpression { ArrayProjectExpression Root $4 }
-           | '*' RestExpression { ObjectProjectExpression Root $2 }
-
-           | FirstSimpleExpression '[' ']' { FlattenExpression $1 Root }
-           | FirstSimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
-           | FirstSimpleExpression '.' '*' { ObjectProjectExpression $1 Root }
-
-           | FirstSimpleExpression '[' ']' RestExpression { FlattenExpression $1 $4 }
-           | FirstSimpleExpression '[' '*' ']' RestExpression { ArrayProjectExpression $1 $5 }
-           | FirstSimpleExpression '.' '*' RestExpression { ObjectProjectExpression $1 $4 }
-
-RestExpression : SimpleExpression { $1 }
-
-               | '[' ']' { FlattenExpression Root Root }
-               | '[' '*' ']' { ArrayProjectExpression Root Root }
-               | '.' '*' { ObjectProjectExpression Root Root }
-
-               | '[' ']' RestExpression { FlattenExpression Root $3 }
-               | '[' '*' ']' RestExpression { ArrayProjectExpression Root $4 }
-               | '.' '*' RestExpression { ObjectProjectExpression Root $3 }
-
-               | SimpleExpression '[' ']' { FlattenExpression $1 Root }
-               | SimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
-               | SimpleExpression '.' '*' { ObjectProjectExpression $1 Root }
-
-               | SimpleExpression '[' ']' RestExpression { FlattenExpression $1 $4 }
-               | SimpleExpression '[' '*' ']' RestExpression { ArrayProjectExpression $1 $5 }
-               | SimpleExpression '.' '*' RestExpression { ObjectProjectExpression $1 $4 }
+ExpressionWithProjections : SimpleExpression { $1 }
+                          | '[' '*' ']' { ArrayProjectExpression Root Root }
+                          | '.' '*' { ObjectProjectExpression Root Root }
+                          | '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression Root $4 }
+                          | '.' '*' ExpressionWithProjections { ObjectProjectExpression Root $3 }
+                          | SimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
+                          | SimpleExpression '.' '*' { ObjectProjectExpression $1 Root }
+                          | SimpleExpression '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression $1 $5 }
+                          | SimpleExpression '.' '*' ExpressionWithProjections { ObjectProjectExpression $1 $4 }
 
 SimpleExpression : '.' Identifier { SubExpression $2 Root }
                  | SimpleExpression '.' Identifier { SubExpression $3 $1 }
