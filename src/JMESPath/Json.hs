@@ -4,6 +4,7 @@ module JMESPath.Json
   , encode
   , getKey
   , getIndex
+  , slice
   , mapArray
   , mapObject
   , flatMap
@@ -38,6 +39,10 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
   where
     normalizedIndex = if index < 0 then Vector.length array + index else index
 getIndex _ _ = nullValue
+
+slice :: Int -> Int -> Value -> Value
+slice from to (Value (Aeson.Array array)) = Value $ Aeson.Array $ Vector.drop from $ Vector.take to array
+slice _ _ _ = nullValue
 
 mapArray :: Monad m => (Value -> m Value) -> Value -> m Value
 mapArray f (Value (Aeson.Array array)) = Value <$> mapValues (fmap toAeson . f . fromAeson) array

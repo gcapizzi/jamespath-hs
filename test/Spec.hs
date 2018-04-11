@@ -105,3 +105,9 @@ main = hspec $
         search "a[].b[].c" "{\"a\": [{\"b\": [{\"c\": [1]}, {\"c\": [2]}]}, {\"b\": [{\"c\": [3]}]}]}" `shouldBe` Right "[[1],[2],[3]]"
         search "foo[][]" "{\"foo\":[[1, 2, 3]]}" `shouldBe` Right "[1,2,3]"
         search "foo[][].bar" "{\"foo\":[[{\"bar\": 1}, {\"bar\": 2}, {\"bar\": 3}]]}" `shouldBe` Right "[1,2,3]"
+
+    context "with a slice expression" $
+      it "extracts the corresponding elements" $ do
+        search "[1:3]" "[1, 2, 3, 4]" `shouldBe` Right "[2,3]"
+        search "bar[1:3]" "{\"bar\": [1, 2, 3, 4]}" `shouldBe` Right "[2,3]"
+        search "[0:2]" "[1, 2, 3]" `shouldBe` Right "[1,2]"

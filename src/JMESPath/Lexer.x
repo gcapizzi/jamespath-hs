@@ -26,6 +26,7 @@ tokens :-
   \] { \_ -> TokenClosedSquare }
   \* { \_ -> TokenStar }
   \[\] { \_ -> TokenOpenClosedSquare }
+  \: { \_ -> TokenColon }
 
 {
 data Token
@@ -37,6 +38,7 @@ data Token
   | TokenClosedSquare
   | TokenStar
   | TokenOpenClosedSquare
+  | TokenColon
   deriving (Eq)
 
 instance Show Token where
@@ -48,6 +50,7 @@ instance Show Token where
   show (TokenClosedSquare) = "]"
   show (TokenStar) = "*"
   show (TokenOpenClosedSquare) = "[]"
+  show (TokenColon) = ":"
 
 scanTokens :: String -> Either String [Token]
 scanTokens input = go ('\n', [], input)

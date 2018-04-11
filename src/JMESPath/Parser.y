@@ -27,6 +27,7 @@ import JMESPath.Ast
     ']' { TokenClosedSquare }
     '*' { TokenStar }
     '[]' { TokenOpenClosedSquare }
+    ':' { TokenColon }
 %%
 
 Expression : FirstExpressionWithProjections { $1 }
@@ -63,7 +64,9 @@ SimpleExpression : '.' Identifier { SubExpression $2 Root }
 FirstSimpleExpression : Identifier { SubExpression $1 Root }
                       | FirstSimpleExpression '.' Identifier { SubExpression $3 $1 }
                       | '[' NUMBER ']' { IndexExpression $2 Root }
+                      | '[' NUMBER ':' NUMBER ']' { SliceExpression $2 $4 Root }
                       | FirstSimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
+                      | FirstSimpleExpression '[' NUMBER ':' NUMBER ']' { SliceExpression $3 $5 $1 }
 
 Identifier : String { Identifier $1 }
 

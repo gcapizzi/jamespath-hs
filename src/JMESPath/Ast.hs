@@ -8,6 +8,7 @@ data Expression = Root
                 | Identifier Text
                 | SubExpression Expression Expression
                 | IndexExpression Int Expression
+                | SliceExpression Int Int Expression
                 | ArrayProjectExpression Expression Expression
                 | ObjectProjectExpression Expression Expression
                 | FlattenExpression Expression Expression

@@ -28,4 +28,8 @@ searchValue (FlattenExpression Root expression) document = Json.flatMap (searchV
 searchValue (FlattenExpression left right) document = do
     value <- searchValue left document
     Json.flatMap (searchValue right) value
+searchValue (SliceExpression from to Root) document = Right $ Json.slice from to document
+searchValue (SliceExpression from to expression) document = do
+    value <- searchValue expression document
+    Right $ Json.slice from to value
 searchValue _ _ = Right Json.nullValue
