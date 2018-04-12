@@ -30,12 +30,11 @@ searchValue (FlattenExpression Root expression) document = Json.flatMap (searchV
 searchValue (FlattenExpression left right) document = do
     value <- searchValue left document
     Json.flatMap (searchValue right) value
-searchValue (SliceExpression from to maybeStep Root) document = Right $ Json.slice from to step document
-  where
-    step = fromMaybe 1 maybeStep
+searchValue (SliceExpression from to maybeStep Root) document = do
+    let step = fromMaybe 1 maybeStep
+    Json.slice from to step document
 searchValue (SliceExpression from to maybeStep expression) document = do
+    let step = fromMaybe 1 maybeStep
     value <- searchValue expression document
-    Right $ Json.slice from to step value
-  where
-    step = fromMaybe 1 maybeStep
+    Json.slice from to step value
 searchValue _ _ = Right Json.nullValue

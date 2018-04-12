@@ -40,18 +40,20 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
     normalizedIndex = if index < 0 then Vector.length array + index else index
 getIndex _ _ = nullValue
 
-slice :: Int -> Int -> Int -> Value -> Value
-slice from to step (Value (Aeson.Array array)) = Value $ Aeson.Array result
-  where
-    result = eachEvery step subList
-    subList = Vector.slice from (to - from) array
-slice _ _ _ _ = nullValue
+slice :: Int -> Int -> Int -> Value -> Either String Value
+slice from to step (Value (Aeson.Array array)) = do
+    let realTo = min to (Vector.length array)
+    let subList = Vector.slice from (realTo - from) array
+    result <- eachEvery step subList
+    return $ Value $ Aeson.Array result
+slice _ _ _ _ = Right nullValue
 
-eachEvery :: Int -> Vector a -> Vector a
-eachEvery 1 xs = xs
+eachEvery :: Int -> Vector a -> Either String (Vector a)
+eachEvery 0 _ = Left "Error: slice step cannot be 0"
+eachEvery 1 xs = Right xs
 eachEvery step xs
-  | Vector.null xs = Vector.empty
-  | otherwise = Vector.cons x $ eachEvery step rst
+  | Vector.null xs = Right Vector.empty
+  | otherwise = Vector.cons x <$> eachEvery step rst
   where
     x = Vector.head xs
     rst = Vector.drop step xs

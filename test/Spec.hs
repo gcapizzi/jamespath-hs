@@ -114,6 +114,7 @@ main = hspec $
         search "foo[*][1:3]" "{\"foo\": [[1, 2, 3, 4]]}" `shouldBe` Right "[[2,3]]"
         search "foo[*].bar[1:3]" "{\"foo\": [{\"bar\": [1, 2, 3, 4]}]}" `shouldBe` Right "[[2,3]]"
         search "[3:7:2]" "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]" `shouldBe` Right "[3,5]"
+        search "[0:1:0]" "[0]" `shouldBe` Left "Error: slice step cannot be 0"
         search "foo[3:7:2]" "{\"foo\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}" `shouldBe` Right "[3,5]"
         search "foo[*][3:7:2]" "{\"foo\": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]}" `shouldBe` Right "[[3,5]]"
         search "foo[*].bar[3:7:2]" "{\"foo\": [{\"bar\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}]}" `shouldBe` Right "[[3,5]]"
