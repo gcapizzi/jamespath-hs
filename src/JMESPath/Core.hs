@@ -3,6 +3,8 @@ module JMESPath.Core
     , Expression (..)
     ) where
 
+import Data.Maybe
+
 import JMESPath.Ast
 import qualified JMESPath.Json as Json
 
@@ -28,8 +30,12 @@ searchValue (FlattenExpression Root expression) document = Json.flatMap (searchV
 searchValue (FlattenExpression left right) document = do
     value <- searchValue left document
     Json.flatMap (searchValue right) value
-searchValue (SliceExpression from to Root) document = Right $ Json.slice from to document
-searchValue (SliceExpression from to expression) document = do
+searchValue (SliceExpression from to maybeStep Root) document = Right $ Json.slice from to step document
+  where
+    step = fromMaybe 1 maybeStep
+searchValue (SliceExpression from to maybeStep expression) document = do
     value <- searchValue expression document
-    Right $ Json.slice from to value
+    Right $ Json.slice from to step value
+  where
+    step = fromMaybe 1 maybeStep
 searchValue _ _ = Right Json.nullValue

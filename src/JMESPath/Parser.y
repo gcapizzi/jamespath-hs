@@ -59,14 +59,20 @@ ExpressionWithProjections : SimpleExpression { $1 }
 SimpleExpression : '.' Identifier { SubExpression $2 Root }
                  | SimpleExpression '.' Identifier { SubExpression $3 $1 }
                  | '[' NUMBER ']' { IndexExpression $2 Root }
+                 | '[' NUMBER ':' NUMBER ']' { SliceExpression $2 $4 Nothing Root }
+                 | '[' NUMBER ':' NUMBER ':' NUMBER ']' { SliceExpression $2 $4 (Just $6) Root }
                  | SimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
+                 | SimpleExpression '[' NUMBER ':' NUMBER ']' { SliceExpression $3 $5 Nothing $1 }
+                 | SimpleExpression '[' NUMBER ':' NUMBER ':' NUMBER ']' { SliceExpression $3 $5 (Just $7) $1 }
 
 FirstSimpleExpression : Identifier { SubExpression $1 Root }
                       | FirstSimpleExpression '.' Identifier { SubExpression $3 $1 }
                       | '[' NUMBER ']' { IndexExpression $2 Root }
-                      | '[' NUMBER ':' NUMBER ']' { SliceExpression $2 $4 Root }
+                      | '[' NUMBER ':' NUMBER ']' { SliceExpression $2 $4 Nothing Root }
+                      | '[' NUMBER ':' NUMBER ':' NUMBER ']' { SliceExpression $2 $4 (Just $6) Root }
                       | FirstSimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
-                      | FirstSimpleExpression '[' NUMBER ':' NUMBER ']' { SliceExpression $3 $5 $1 }
+                      | FirstSimpleExpression '[' NUMBER ':' NUMBER ']' { SliceExpression $3 $5 Nothing $1 }
+                      | FirstSimpleExpression '[' NUMBER ':' NUMBER ':' NUMBER ']' { SliceExpression $3 $5 (Just $7) $1 }
 
 Identifier : String { Identifier $1 }
 

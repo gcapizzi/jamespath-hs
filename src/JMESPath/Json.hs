@@ -40,9 +40,21 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
     normalizedIndex = if index < 0 then Vector.length array + index else index
 getIndex _ _ = nullValue
 
-slice :: Int -> Int -> Value -> Value
-slice from to (Value (Aeson.Array array)) = Value $ Aeson.Array $ Vector.drop from $ Vector.take to array
-slice _ _ _ = nullValue
+slice :: Int -> Int -> Int -> Value -> Value
+slice from to step (Value (Aeson.Array array)) = Value $ Aeson.Array result
+  where
+    result = eachEvery step subList
+    subList = Vector.slice from (to - from) array
+slice _ _ _ _ = nullValue
+
+eachEvery :: Int -> Vector a -> Vector a
+eachEvery 1 xs = xs
+eachEvery step xs
+  | Vector.null xs = Vector.empty
+  | otherwise = Vector.cons x $ eachEvery step rst
+  where
+    x = Vector.head xs
+    rst = Vector.drop step xs
 
 mapArray :: Monad m => (Value -> m Value) -> Value -> m Value
 mapArray f (Value (Aeson.Array array)) = Value <$> mapValues (fmap toAeson . f . fromAeson) array

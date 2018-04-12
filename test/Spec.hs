@@ -109,5 +109,11 @@ main = hspec $
     context "with a slice expression" $
       it "extracts the corresponding elements" $ do
         search "[1:3]" "[1, 2, 3, 4]" `shouldBe` Right "[2,3]"
+        search "[0:10]" "[1, 2, 3]" `shouldBe` Right "[1,2,3]"
         search "bar[1:3]" "{\"bar\": [1, 2, 3, 4]}" `shouldBe` Right "[2,3]"
-        search "[0:2]" "[1, 2, 3]" `shouldBe` Right "[1,2]"
+        search "foo[*][1:3]" "{\"foo\": [[1, 2, 3, 4]]}" `shouldBe` Right "[[2,3]]"
+        search "foo[*].bar[1:3]" "{\"foo\": [{\"bar\": [1, 2, 3, 4]}]}" `shouldBe` Right "[[2,3]]"
+        search "[3:7:2]" "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]" `shouldBe` Right "[3,5]"
+        search "foo[3:7:2]" "{\"foo\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}" `shouldBe` Right "[3,5]"
+        search "foo[*][3:7:2]" "{\"foo\": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]}" `shouldBe` Right "[[3,5]]"
+        search "foo[*].bar[3:7:2]" "{\"foo\": [{\"bar\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}]}" `shouldBe` Right "[[3,5]]"
