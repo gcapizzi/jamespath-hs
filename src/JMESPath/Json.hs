@@ -42,8 +42,9 @@ getIndex _ _ = nullValue
 
 slice :: Int -> Int -> Int -> Value -> Either String Value
 slice from to step (Value (Aeson.Array array)) = do
-    let realTo = min to (Vector.length array)
-    let subList = Vector.slice from (realTo - from) array
+    let normalizedFrom = if from < 0 then Vector.length array + from else from
+    let normalizedTo = if to < 0 then Vector.length array + to else min to (Vector.length array)
+    let subList = Vector.slice normalizedFrom (normalizedTo - normalizedFrom) array
     result <- eachEvery step subList
     return $ Value $ Aeson.Array result
 slice _ _ _ _ = Right nullValue
