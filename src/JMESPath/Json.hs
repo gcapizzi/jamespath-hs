@@ -55,8 +55,8 @@ slice _ _ _ _ = Right nullValue
 eachEvery :: Int -> Vector a -> Vector a
 eachEvery 1 xs = xs
 eachEvery step xs
-  | Vector.null xs = Vector.empty
-  | otherwise = Vector.cons x $ eachEvery step rst
+    | Vector.null xs = Vector.empty
+    | otherwise = Vector.cons x $ eachEvery step rst
   where
     x = Vector.head xs
     rst = Vector.drop step xs
