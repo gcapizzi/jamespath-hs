@@ -41,22 +41,22 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
 getIndex _ _ = nullValue
 
 slice :: Int -> Int -> Int -> Value -> Either String Value
-slice from to step (Value (Aeson.Array array)) = do
-    let len = Vector.length array
-    let normalizedFrom = if from < 0 then max 0 (len + from) else min from len
-    let normalizedTo = if to < 0 then max 0 (len + to) else min to len
-    let count = if normalizedFrom < normalizedTo then normalizedTo - normalizedFrom else 0 
-    let subList = Vector.slice normalizedFrom count array
-    result <- eachEvery step subList
-    return $ Value $ Aeson.Array result
+slice _ _ 0 _ = Left "Error: slice step cannot be 0"
+slice from to step (Value (Aeson.Array array)) = Right $ Value $ Aeson.Array result
+  where
+    len = Vector.length array
+    normalizedFrom = if from < 0 then max 0 (len + from) else min from len
+    normalizedTo = if to < 0 then max 0 (len + to) else min to len
+    count = if normalizedFrom < normalizedTo then normalizedTo - normalizedFrom else 0
+    subList = Vector.slice normalizedFrom count array
+    result = eachEvery step subList
 slice _ _ _ _ = Right nullValue
 
-eachEvery :: Int -> Vector a -> Either String (Vector a)
-eachEvery 0 _ = Left "Error: slice step cannot be 0"
-eachEvery 1 xs = Right xs
+eachEvery :: Int -> Vector a -> Vector a
+eachEvery 1 xs = xs
 eachEvery step xs
-  | Vector.null xs = Right Vector.empty
-  | otherwise = Vector.cons x <$> eachEvery step rst
+  | Vector.null xs = Vector.empty
+  | otherwise = Vector.cons x $ eachEvery step rst
   where
     x = Vector.head xs
     rst = Vector.drop step xs
