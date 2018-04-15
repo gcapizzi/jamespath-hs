@@ -42,14 +42,19 @@ getIndex _ _ = nullValue
 
 slice :: Int -> Int -> Int -> Value -> Either String Value
 slice _ _ 0 _ = Left "Error: slice step cannot be 0"
-slice from to step (Value (Aeson.Array array)) = Right $ Value $ Aeson.Array result
+slice from to step (Value (Aeson.Array array))
+    | step > 0 = let normalizedFrom = if from < 0 then max 0 (len + from) else min from len
+                     normalizedTo = if to < 0 then max 0 (len + to) else min to len
+                     count = if normalizedFrom < normalizedTo then normalizedTo - normalizedFrom else 0
+                     subList = Vector.slice normalizedFrom count array
+                 in Right $ Value $ Aeson.Array $ eachEvery step subList
+    | step < 0 = let normalizedFrom = if from < 0 then max (-1) (len + from) else min from (len - 1)
+                     normalizedTo = if to < 0 then max (-1) (len + to) else min to (len - 1)
+                     count = if normalizedTo < normalizedFrom then normalizedFrom - normalizedTo else 0
+                     subList = Vector.slice (len - normalizedFrom - 1) count (Vector.reverse array)
+                 in Right $ Value $ Aeson.Array $ eachEvery (-step) subList
   where
     len = Vector.length array
-    normalizedFrom = if from < 0 then max 0 (len + from) else min from len
-    normalizedTo = if to < 0 then max 0 (len + to) else min to len
-    count = if normalizedFrom < normalizedTo then normalizedTo - normalizedFrom else 0
-    subList = Vector.slice normalizedFrom count array
-    result = eachEvery step subList
 slice _ _ _ _ = Right nullValue
 
 eachEvery :: Int -> Vector a -> Vector a
