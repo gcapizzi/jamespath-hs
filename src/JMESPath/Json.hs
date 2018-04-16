@@ -40,22 +40,35 @@ getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null 
     normalizedIndex = if index < 0 then Vector.length array + index else index
 getIndex _ _ = nullValue
 
-slice :: Int -> Int -> Int -> Value -> Either String Value
-slice _ _ 0 _ = Left "Error: slice step cannot be 0"
-slice from to step (Value (Aeson.Array array))
-    | step > 0 = let normalizedFrom = if from < 0 then max 0 (len + from) else min from len
-                     normalizedTo = if to < 0 then max 0 (len + to) else min to len
-                     count = if normalizedFrom < normalizedTo then normalizedTo - normalizedFrom else 0
-                     subList = Vector.slice normalizedFrom count array
+slice :: Maybe Int -> Maybe Int -> Maybe Int -> Value -> Either String Value
+slice _ _ (Just 0) _ = Left "Error: slice step cannot be 0"
+slice maybeFrom maybeTo maybeStep (Value (Aeson.Array array))
+    | step > 0 = let count = if from < to then to - from else 0
+                     subList = Vector.slice from count array
                  in Right $ Value $ Aeson.Array $ eachEvery step subList
-    | step < 0 = let normalizedFrom = if from < 0 then max (-1) (len + from) else min from (len - 1)
-                     normalizedTo = if to < 0 then max (-1) (len + to) else min to (len - 1)
-                     count = if normalizedTo < normalizedFrom then normalizedFrom - normalizedTo else 0
-                     subList = Vector.slice (len - normalizedFrom - 1) count (Vector.reverse array)
+    | step < 0 = let count = if to < from then from - to else 0
+                     subList = Vector.slice (len - from - 1) count (Vector.reverse array)
                  in Right $ Value $ Aeson.Array $ eachEvery (-step) subList
   where
+    from = Maybe.maybe (if step < 0 then len - 1 else 0) (capSlice step len) maybeFrom
+    to = Maybe.maybe (if step < 0 then -1 else len) (capSlice step len) maybeTo
+    step = Maybe.fromMaybe 1 maybeStep
     len = Vector.length array
 slice _ _ _ _ = Right nullValue
+
+capSlice :: Int -> Int -> Int -> Int
+capSlice step len actual
+    | actual < 0 =
+        if actual + len < 0
+            then if step < 0
+                then -1
+                else 0
+            else actual + len
+    | actual >= len =
+        if step < 0
+            then len - 1
+            else len
+    | otherwise = actual
 
 eachEvery :: Int -> Vector a -> Vector a
 eachEvery 1 xs = xs
