@@ -5,8 +5,7 @@ module JMESPath.Ast
 import Data.Text (Text)
 
 data Expression = Root
-                | Identifier Text
-                | SubExpression Expression Expression
+                | KeyExpression Text Expression
                 | IndexExpression Int Expression
                 | SliceExpression (Maybe Int) (Maybe Int) (Maybe Int) Expression Expression
                 | ArrayProjectExpression Expression Expression

@@ -72,17 +72,15 @@ ExpressionWithProjections : SimpleExpression { $1 }
                           | SimpleExpression '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression $1 $5 }
                           | SimpleExpression '.' '*' ExpressionWithProjections { ObjectProjectExpression $1 $4 }
 
-SimpleExpression : '.' Identifier { SubExpression $2 Root }
-                 | SimpleExpression '.' Identifier { SubExpression $3 $1 }
+SimpleExpression : '.' String { KeyExpression $2 Root }
+                 | SimpleExpression '.' String { KeyExpression $3 $1 }
                  | '[' NUMBER ']' { IndexExpression $2 Root }
                  | SimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
 
-FirstSimpleExpression : Identifier { SubExpression $1 Root }
-                      | FirstSimpleExpression '.' Identifier { SubExpression $3 $1 }
+FirstSimpleExpression : String { KeyExpression $1 Root }
+                      | FirstSimpleExpression '.' String { KeyExpression $3 $1 }
                       | '[' NUMBER ']' { IndexExpression $2 Root }
                       | FirstSimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
-
-Identifier : String { Identifier $1 }
 
 String : UNQUOTED_STRING { Text.pack $1 }
        | QUOTED_STRING {% Aeson.eitherDecode $ LaxyText.Encoding.encodeUtf8 $ LazyText.pack $1 }
