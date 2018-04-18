@@ -127,3 +127,8 @@ main = hspec $
         search "foo[*][3:7:2]" "{\"foo\": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]}" `shouldBe` Right "[[3,5]]"
         search "foo[*].bar[3:7:2]" "{\"foo\": [{\"bar\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}]}" `shouldBe` Right "[[3,5]]"
         search "foo[1:].bar" "{\"foo\": [{\"bar\": 1}, {\"bar\": 2}, {\"bar\": 3}]}" `shouldBe` Right "[2,3]"
+
+    context "with a pipe expression" $
+      it "stops the propagation of the projection" $ do
+        search "foo[*].bar | [0]" "{\"foo\": [{\"bar\": [1, 2]}, {\"bar\": [3, 4]}]}" `shouldBe` Right "[1,2]"
+        search "foo| bar | baz" "{\"foo\": {\"bar\": {\"baz\": true}}}" `shouldBe` Right "true"

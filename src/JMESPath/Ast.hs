@@ -11,4 +11,5 @@ data Expression = Root
                 | ArrayProjectExpression Expression Expression
                 | ObjectProjectExpression Expression Expression
                 | FlattenExpression Expression Expression
+                | PipeExpression Expression Expression
     deriving Show
