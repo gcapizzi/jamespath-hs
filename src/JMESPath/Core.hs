@@ -38,4 +38,3 @@ searchValue (SliceExpression from to step left right) document = do
 searchValue (PipeExpression left right) document = do
     value <- searchValue left document
     searchValue right value
-searchValue _ _ = Right Json.nullValue
