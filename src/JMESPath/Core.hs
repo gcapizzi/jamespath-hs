@@ -11,30 +11,29 @@ searchValue Root document = Right document
 searchValue (KeyExpression key Root) document = Right $ Json.getKey key document
 searchValue (KeyExpression key expression) document = do
     value <- searchValue expression document
-    Right $ Json.getKey key value
+    searchValue (KeyExpression key Root) value
 searchValue (IndexExpression index Root) document = Right $ Json.getIndex index document
 searchValue (IndexExpression index expression) document = do
     value <- searchValue expression document
-    Right $ Json.getIndex index value
+    searchValue (IndexExpression index Root) value
 searchValue (ArrayProjectExpression Root expression) document = Json.mapArray (searchValue expression) document
 searchValue (ArrayProjectExpression left right) document = do
     value <- searchValue left document
-    Json.mapArray (searchValue right) value
+    searchValue (ArrayProjectExpression Root right) value
 searchValue (ObjectProjectExpression Root expression) document = Json.mapObject (searchValue expression) document
 searchValue (ObjectProjectExpression left right) document = do
     value <- searchValue left document
-    Json.mapObject (searchValue right) value
+    searchValue (ObjectProjectExpression Root right) value
 searchValue (FlattenExpression Root expression) document = Json.flatMap (searchValue expression) document
 searchValue (FlattenExpression left right) document = do
     value <- searchValue left document
-    Json.flatMap (searchValue right) value
+    searchValue (FlattenExpression Root right) value
 searchValue (SliceExpression from to step Root expression) document = do
     slice <- Json.slice from to step document
     Json.mapArray (searchValue expression) slice
 searchValue (SliceExpression from to step left right) document = do
     value <- searchValue left document
-    slice <- Json.slice from to step value
-    Json.mapArray (searchValue right) slice
+    searchValue (SliceExpression from to step Root right) value
 searchValue (PipeExpression left right) document = do
     value <- searchValue left document
     searchValue right value
@@ -43,8 +42,7 @@ searchValue (MultiSelectList expressions Root) document = do
     Right $ Json.array values
 searchValue (MultiSelectList expressions expression) document = do
     value <- searchValue expression document
-    values <- mapM (`searchValue` value) expressions
-    Right $ Json.array values
+    searchValue (MultiSelectList expressions Root) value
 searchValue (MultiSelectHash pairs Root) document =
     if Json.isNull document
     then Right Json.nullValue
