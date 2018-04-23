@@ -139,3 +139,12 @@ main = hspec $
         search "foo.[one, two]" "{\"foo\": {\"one\": 1, \"two\": 2}}" `shouldBe` Right "[1,2]"
         search "foo[*].[one, two]" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[[1,2]]"
         search "foo[*][0].[one, two]" "{\"foo\": [[{\"one\": 1, \"two\": 2}]]}" `shouldBe` Right "[[1,2]]"
+
+    context "with a multiselect hash" $
+      it "returns an object with the same keys and expression results as values" $ do
+        search "{one: one, two: two}" "{\"one\": 1, \"two\": 2, \"three\": 3}" `shouldBe` Right "{\"two\":2,\"one\":1}"
+        search "{one: one, two: two}" "null" `shouldBe` Right "null"
+        search "foo.{one: one, two: two}" "{\"foo\": {\"one\": 1, \"two\": 2, \"three\": 3}}" `shouldBe` Right "{\"two\":2,\"one\":1}"
+        search "foo.{one: one, two: two}" "{}" `shouldBe` Right "null"
+        search "foo[*].{one: one}" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[{\"one\":1}]"
+        search "foo[*][0].{one: one}" "{\"foo\": [[{\"one\": 1, \"two\": 2}]]}" `shouldBe` Right "[{\"one\":1}]"

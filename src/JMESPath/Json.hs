@@ -10,6 +10,8 @@ module JMESPath.Json
   , flatMap
   , nullValue
   , array
+  , object
+  , isNull
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -118,3 +120,10 @@ nullValue = Value Aeson.Null
 
 array :: [Value] -> Value
 array values = Value $ Aeson.Array $ Vector.fromList $ map toAeson values
+
+object :: [(Text, Value)] -> Value
+object pairs = Value $ Aeson.Object $ HashMap.fromList $ map (fmap toAeson) pairs
+
+isNull :: Value -> Bool
+isNull (Value Aeson.Null) = True
+isNull _ = False

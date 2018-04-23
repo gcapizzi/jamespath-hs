@@ -29,6 +29,8 @@ tokens :-
   \: { \_ -> TokenColon }
   \| { \_ -> TokenPipe }
   \, { \_ -> TokenComma }
+  \{ { \_ -> TokenOpenCurly }
+  \} { \_ -> TokenClosedCurly }
 
 {
 data Token
@@ -43,6 +45,8 @@ data Token
   | TokenColon
   | TokenPipe
   | TokenComma
+  | TokenOpenCurly
+  | TokenClosedCurly
   deriving (Eq)
 
 instance Show Token where
@@ -57,6 +61,8 @@ instance Show Token where
   show (TokenColon) = ":"
   show (TokenPipe) = "|"
   show (TokenComma) = ","
+  show (TokenOpenCurly) = "{"
+  show (TokenClosedCurly) = "}"
 
 scanTokens :: String -> Either String [Token]
 scanTokens input = go ('\n', [], input)

@@ -9,5 +9,5 @@ Currently supports:
 * Slices
 * Flattening
 * Wildcards
-* MultiSelect Lists
+* MultiSelect Lists and Hashes
 * Pipes

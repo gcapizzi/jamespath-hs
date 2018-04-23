@@ -45,3 +45,12 @@ searchValue (MultiSelectList expressions expression) document = do
     value <- searchValue expression document
     values <- mapM (`searchValue` value) expressions
     Right $ Json.array values
+searchValue (MultiSelectHash pairs Root) document =
+    if Json.isNull document
+    then Right Json.nullValue
+    else do
+        valuePairs <- mapM (mapM (`searchValue` document)) pairs
+        Right $ Json.object valuePairs
+searchValue (MultiSelectHash pairs expression) document = do
+    value <- searchValue expression document
+    searchValue (MultiSelectHash pairs Root) value
