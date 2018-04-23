@@ -38,3 +38,10 @@ searchValue (SliceExpression from to step left right) document = do
 searchValue (PipeExpression left right) document = do
     value <- searchValue left document
     searchValue right value
+searchValue (MultiSelectList expressions Root) document = do
+    values <- mapM (`searchValue` document) expressions
+    Right $ Json.array values
+searchValue (MultiSelectList expressions expression) document = do
+    value <- searchValue expression document
+    values <- mapM (`searchValue` value) expressions
+    Right $ Json.array values

@@ -132,3 +132,9 @@ main = hspec $
       it "stops the propagation of the projection" $ do
         search "foo[*].bar | [0]" "{\"foo\": [{\"bar\": [1, 2]}, {\"bar\": [3, 4]}]}" `shouldBe` Right "[1,2]"
         search "foo| bar | baz" "{\"foo\": {\"bar\": {\"baz\": true}}}" `shouldBe` Right "true"
+
+    context "with a multiselect list" $
+      it "returns a list of the results of evalutaing the single expressions" $ do
+        search "[one, two]" "{\"one\": 1, \"two\": 2}" `shouldBe` Right "[1,2]"
+        search "foo.[one, two]" "{\"foo\": {\"one\": 1, \"two\": 2}}" `shouldBe` Right "[1,2]"
+        search "foo[0].[one, two]" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[1,2]"

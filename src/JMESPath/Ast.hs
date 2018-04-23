@@ -12,4 +12,5 @@ data Expression = Root
                 | ObjectProjectExpression Expression Expression
                 | FlattenExpression Expression Expression
                 | PipeExpression Expression Expression
+                | MultiSelectList [Expression] Expression
     deriving Show

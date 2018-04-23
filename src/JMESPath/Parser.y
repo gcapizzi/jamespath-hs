@@ -29,6 +29,7 @@ import JMESPath.Ast
     '[]' { TokenOpenClosedSquare }
     ':' { TokenColon }
     '|' { TokenPipe }
+    ',' { TokenComma }
 %%
 
 Expression : FirstExpressionWithProjections { $1 }
@@ -37,6 +38,9 @@ Expression : FirstExpressionWithProjections { $1 }
            | Expression '[]' { FlattenExpression $1 Root }
            | Expression '[]' ExpressionWithProjections { FlattenExpression $1 $3 }
            | FirstExpressionWithProjections '|' Expression { PipeExpression $1 $3 }
+
+ExpressionList : Expression { [$1] }
+               | Expression ',' ExpressionList { $1 : $3 }
 
 FirstExpressionWithProjections : FirstSimpleExpression { $1 }
                                | '[' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $2 $4 Nothing Root Root }
@@ -77,12 +81,16 @@ ExpressionWithProjections : SimpleExpression { $1 }
 SimpleExpression : '.' String { KeyExpression $2 Root }
                  | SimpleExpression '.' String { KeyExpression $3 $1 }
                  | '[' NUMBER ']' { IndexExpression $2 Root }
+                 | '.' '[' ExpressionList ']' { MultiSelectList $3 Root }
                  | SimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
+                 | SimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
 
 FirstSimpleExpression : String { KeyExpression $1 Root }
                       | FirstSimpleExpression '.' String { KeyExpression $3 $1 }
                       | '[' NUMBER ']' { IndexExpression $2 Root }
+                      | '[' ExpressionList ']' { MultiSelectList $2 Root }
                       | FirstSimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
+                      | FirstSimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
 
 String : UNQUOTED_STRING { Text.pack $1 }
        | QUOTED_STRING {% Aeson.eitherDecode $ LaxyText.Encoding.encodeUtf8 $ LazyText.pack $1 }

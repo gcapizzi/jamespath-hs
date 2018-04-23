@@ -9,4 +9,5 @@ Currently supports:
 * Slices
 * Flattening
 * Wildcards
+* MultiSelect Lists
 * Pipes

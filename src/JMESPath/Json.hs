@@ -9,6 +9,7 @@ module JMESPath.Json
   , mapObject
   , flatMap
   , nullValue
+  , array
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -114,3 +115,6 @@ toAeson (Value v) = v
 
 nullValue :: Value
 nullValue = Value Aeson.Null
+
+array :: [Value] -> Value
+array values = Value $ Aeson.Array $ Vector.fromList $ map toAeson values
