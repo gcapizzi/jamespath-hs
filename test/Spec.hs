@@ -137,4 +137,5 @@ main = hspec $
       it "returns a list of the results of evalutaing the single expressions" $ do
         search "[one, two]" "{\"one\": 1, \"two\": 2}" `shouldBe` Right "[1,2]"
         search "foo.[one, two]" "{\"foo\": {\"one\": 1, \"two\": 2}}" `shouldBe` Right "[1,2]"
-        search "foo[0].[one, two]" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[1,2]"
+        search "foo[*].[one, two]" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[[1,2]]"
+        search "foo[*][0].[one, two]" "{\"foo\": [[{\"one\": 1, \"two\": 2}]]}" `shouldBe` Right "[[1,2]]"
