@@ -10,7 +10,7 @@ main = hspec $
   describe "JMESPath.search" $ do
     context "when syntax is invalid" $
       it "fails" $ do
-        search "&foo" "{}" `shouldBe` Left "Syntax error: unexpected input '&foo'"
+        search "^foo" "{}" `shouldBe` Left "Syntax error: unexpected input '^foo'"
         search "" "{}" `shouldBe` Left "Syntax error: unexpected end of input"
         fromLeft "" (search ".foo" "{}") `shouldSatisfy` isPrefixOf "Syntax error: unexpected token '.'"
 
@@ -157,3 +157,8 @@ main = hspec $
         search "foo || bar" "{\"foo\": {}, \"bar\": 42}" `shouldBe` Right "42"
         search "foo || bar" "{\"foo\": \"\", \"bar\": 42}" `shouldBe` Right "42"
         search "foo || bar" "{\"foo\": false, \"bar\": 42}" `shouldBe` Right "42"
+
+    context "with an and expression" $
+      it "returns the last non-false expression" $ do
+        search "foo && bar" "{\"foo\": true, \"bar\": 42}" `shouldBe` Right "42"
+        search "foo && bar" "{\"bar\": 42}" `shouldBe` Right "null"

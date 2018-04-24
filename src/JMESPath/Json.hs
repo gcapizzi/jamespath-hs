@@ -13,6 +13,7 @@ module JMESPath.Json
   , object
   , isNull
   , isFalsy
+  , isTruthy
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -137,3 +138,6 @@ isFalsy (Value (Aeson.Object object)) = HashMap.null object
 isFalsy (Value (Aeson.String string)) = Text.null string
 isFalsy (Value (Aeson.Bool bool)) = not bool
 isFalsy _ = False
+
+isTruthy :: Value -> Bool
+isTruthy = not . isFalsy
