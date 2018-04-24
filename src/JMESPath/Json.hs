@@ -12,6 +12,7 @@ module JMESPath.Json
   , array
   , object
   , isNull
+  , isFalsy
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -20,6 +21,7 @@ import Data.Vector (Vector)
 import qualified Data.Aeson as Aeson
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
+import qualified Data.Text as Text
 import qualified Data.Vector as Vector
 
 newtype Value = Value Aeson.Value deriving Show
@@ -127,3 +129,11 @@ object pairs = Value $ Aeson.Object $ HashMap.fromList $ map (fmap toAeson) pair
 isNull :: Value -> Bool
 isNull (Value Aeson.Null) = True
 isNull _ = False
+
+isFalsy :: Value -> Bool
+isFalsy (Value Aeson.Null) = True
+isFalsy (Value (Aeson.Array array)) = Vector.null array
+isFalsy (Value (Aeson.Object object)) = HashMap.null object
+isFalsy (Value (Aeson.String string)) = Text.null string
+isFalsy (Value (Aeson.Bool bool)) = not bool
+isFalsy _ = False

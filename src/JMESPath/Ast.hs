@@ -14,4 +14,5 @@ data Expression = Root
                 | PipeExpression Expression Expression
                 | MultiSelectList [Expression] Expression
                 | MultiSelectHash [(Text, Expression)] Expression
+                | OrExpression Expression Expression
     deriving Show

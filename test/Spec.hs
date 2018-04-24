@@ -148,3 +148,12 @@ main = hspec $
         search "foo.{one: one, two: two}" "{}" `shouldBe` Right "null"
         search "foo[*].{one: one}" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[{\"one\":1}]"
         search "foo[*][0].{one: one}" "{\"foo\": [[{\"one\": 1, \"two\": 2}]]}" `shouldBe` Right "[{\"one\":1}]"
+
+    context "with an or expression" $
+      it "returns the first non-false expression" $ do
+        search "foo || bar" "{\"foo\": 42}" `shouldBe` Right "42"
+        search "foo || bar" "{\"bar\": 42}" `shouldBe` Right "42"
+        search "foo || bar" "{\"foo\": [], \"bar\": 42}" `shouldBe` Right "42"
+        search "foo || bar" "{\"foo\": {}, \"bar\": 42}" `shouldBe` Right "42"
+        search "foo || bar" "{\"foo\": \"\", \"bar\": 42}" `shouldBe` Right "42"
+        search "foo || bar" "{\"foo\": false, \"bar\": 42}" `shouldBe` Right "42"

@@ -52,3 +52,9 @@ searchValue (MultiSelectHash pairs Root) document =
 searchValue (MultiSelectHash pairs expression) document = do
     value <- searchValue expression document
     searchValue (MultiSelectHash pairs Root) value
+searchValue (OrExpression left right) document = do
+    leftValue <- searchValue left document
+    rightValue <- searchValue right document
+    if Json.isFalsy leftValue
+        then Right rightValue
+        else Right leftValue

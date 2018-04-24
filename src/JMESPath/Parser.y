@@ -32,6 +32,7 @@ import JMESPath.Ast
     ',' { TokenComma }
     '{' { TokenOpenCurly }
     '}' { TokenClosedCurly }
+    '||' { TokenOr }
 %%
 
 Expression : FirstExpressionWithProjections { $1 }
@@ -40,6 +41,7 @@ Expression : FirstExpressionWithProjections { $1 }
            | '[]' ExpressionWithProjections { FlattenExpression Root $2 }
            | Expression '[]' { FlattenExpression $1 Root }
            | Expression '[]' ExpressionWithProjections { FlattenExpression $1 $3 }
+           | Expression '||' Expression { OrExpression $1 $3 }
 
 FirstExpressionWithProjections : FirstSimpleExpression { $1 }
                                | '[' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $2 $4 Nothing Root Root }
