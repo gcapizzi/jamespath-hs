@@ -10,4 +10,5 @@ Currently supports:
 * Flattening
 * Wildcards
 * MultiSelect Lists and Hashes
+* Ands, Ors and Parens
 * Pipes
