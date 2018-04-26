@@ -162,3 +162,8 @@ main = hspec $
       it "returns the last non-false expression" $ do
         search "foo && bar" "{\"foo\": true, \"bar\": 42}" `shouldBe` Right "42"
         search "foo && bar" "{\"bar\": 42}" `shouldBe` Right "null"
+
+    context "with mixed boolean expressions" $
+      it "applies the usual precedence rules" $ do
+        search "a || b && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "true"
+        search "a && b || c" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "true"

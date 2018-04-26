@@ -34,6 +34,9 @@ import JMESPath.Ast
     '}' { TokenClosedCurly }
     '||' { TokenOr }
     '&&' { TokenAnd }
+
+%left '||'
+%left '&&'
 %%
 
 Expression : FirstExpressionWithProjections { $1 }
