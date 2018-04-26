@@ -16,4 +16,5 @@ data Expression = Root
                 | MultiSelectHash [(Text, Expression)] Expression
                 | OrExpression Expression Expression
                 | AndExpression Expression Expression
+                | NotExpression Expression
     deriving Show

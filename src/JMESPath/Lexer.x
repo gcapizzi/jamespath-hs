@@ -35,6 +35,7 @@ tokens :-
   \&\& { \_ -> TokenAnd }
   \( { \_ -> TokenOpenParen }
   \) { \_ -> TokenClosedParen }
+  \! { \_ -> TokenNot }
 
 {
 data Token
@@ -55,6 +56,7 @@ data Token
   | TokenAnd
   | TokenOpenParen
   | TokenClosedParen
+  | TokenNot
   deriving (Eq)
 
 instance Show Token where
@@ -75,6 +77,7 @@ instance Show Token where
   show (TokenAnd) = "&&"
   show (TokenOpenParen) = "("
   show (TokenClosedParen) = ")"
+  show (TokenNot) = "!"
 
 scanTokens :: String -> Either String [Token]
 scanTokens input = go ('\n', [], input)

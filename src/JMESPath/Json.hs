@@ -14,6 +14,7 @@ module JMESPath.Json
   , isNull
   , isFalsy
   , isTruthy
+  , bool
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -141,3 +142,6 @@ isFalsy _ = False
 
 isTruthy :: Value -> Bool
 isTruthy = not . isFalsy
+
+bool :: Bool -> Value
+bool = Value . Aeson.Bool

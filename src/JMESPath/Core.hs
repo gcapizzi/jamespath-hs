@@ -64,3 +64,6 @@ searchValue (AndExpression left right) document = do
     if Json.isTruthy leftValue
         then Right rightValue
         else Right leftValue
+searchValue (NotExpression expression) document = do
+    value <- searchValue expression document
+    Right $ Json.bool $ Json.isFalsy value

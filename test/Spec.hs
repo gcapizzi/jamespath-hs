@@ -163,10 +163,15 @@ main = hspec $
         search "foo && bar" "{\"foo\": true, \"bar\": 42}" `shouldBe` Right "42"
         search "foo && bar" "{\"bar\": 42}" `shouldBe` Right "null"
 
+    context "with a not expression" $
+      it "returns the logical negation of the expression" $
+        search "!foo" "{\"foo\": true}" `shouldBe` Right "false"
+
     context "with mixed boolean expressions" $
       it "applies the usual precedence rules" $ do
         search "a || b && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "true"
         search "a && b || c" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "true"
+        search "!a && b" "{\"a\": false, \"b\": false}" `shouldBe` Right "false"
 
     context "with parenthesis" $
       it "gives precedence to expressions in parenthesis" $ do
