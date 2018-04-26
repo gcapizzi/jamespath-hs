@@ -167,3 +167,8 @@ main = hspec $
       it "applies the usual precedence rules" $ do
         search "a || b && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "true"
         search "a && b || c" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "true"
+
+    context "with parenthesis" $
+      it "gives precedence to expressions in parenthesis" $ do
+        search "(a || b) && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "false"
+        search "a && (b || c)" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "false"

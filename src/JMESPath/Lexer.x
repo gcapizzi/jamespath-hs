@@ -33,6 +33,8 @@ tokens :-
   \} { \_ -> TokenClosedCurly }
   \|\| { \_ -> TokenOr }
   \&\& { \_ -> TokenAnd }
+  \( { \_ -> TokenOpenParen }
+  \) { \_ -> TokenClosedParen }
 
 {
 data Token
@@ -51,6 +53,8 @@ data Token
   | TokenClosedCurly
   | TokenOr
   | TokenAnd
+  | TokenOpenParen
+  | TokenClosedParen
   deriving (Eq)
 
 instance Show Token where
@@ -69,6 +73,8 @@ instance Show Token where
   show (TokenClosedCurly) = "}"
   show (TokenOr) = "||"
   show (TokenAnd) = "&&"
+  show (TokenOpenParen) = "("
+  show (TokenClosedParen) = ")"
 
 scanTokens :: String -> Either String [Token]
 scanTokens input = go ('\n', [], input)
