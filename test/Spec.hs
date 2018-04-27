@@ -177,3 +177,9 @@ main = hspec $
       it "gives precedence to expressions in parenthesis" $ do
         search "(a || b) && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "false"
         search "a && (b || c)" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "false"
+
+    context "with comparators" $
+      context "==" $
+        it "returns true if the two values are equal" $ do
+          search "a == b" "{\"a\": 42, \"b\": 42}" `shouldBe` Right "true"
+          search "a == b" "{\"a\": 42, \"b\": 43}" `shouldBe` Right "false"

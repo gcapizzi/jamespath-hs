@@ -17,4 +17,5 @@ data Expression = Root
                 | OrExpression Expression Expression
                 | AndExpression Expression Expression
                 | NotExpression Expression
+                | EqualExpression Expression Expression
     deriving Show

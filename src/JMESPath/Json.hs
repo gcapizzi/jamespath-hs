@@ -15,6 +15,7 @@ module JMESPath.Json
   , isFalsy
   , isTruthy
   , bool
+  , equal
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -26,7 +27,7 @@ import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Data.Vector as Vector
 
-newtype Value = Value Aeson.Value deriving Show
+newtype Value = Value Aeson.Value deriving (Show, Eq)
 
 decode :: ByteString -> Either String Value
 decode document = Value <$> (Aeson.eitherDecode document :: Either String Aeson.Value)
@@ -145,3 +146,6 @@ isTruthy = not . isFalsy
 
 bool :: Bool -> Value
 bool = Value . Aeson.Bool
+
+equal :: Value -> Value -> Value
+equal x y  = bool $ x == y
