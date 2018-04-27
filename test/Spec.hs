@@ -149,37 +149,37 @@ main = hspec $
         search "foo[*].{one: one}" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[{\"one\":1}]"
         search "foo[*][0].{one: one}" "{\"foo\": [[{\"one\": 1, \"two\": 2}]]}" `shouldBe` Right "[{\"one\":1}]"
 
-    context "with an or expression" $
-      it "returns the first non-false expression" $ do
-        search "foo || bar" "{\"foo\": 42}" `shouldBe` Right "42"
-        search "foo || bar" "{\"bar\": 42}" `shouldBe` Right "42"
-        search "foo || bar" "{\"foo\": [], \"bar\": 42}" `shouldBe` Right "42"
-        search "foo || bar" "{\"foo\": {}, \"bar\": 42}" `shouldBe` Right "42"
-        search "foo || bar" "{\"foo\": \"\", \"bar\": 42}" `shouldBe` Right "42"
-        search "foo || bar" "{\"foo\": false, \"bar\": 42}" `shouldBe` Right "42"
-
-    context "with an and expression" $
-      it "returns the last non-false expression" $ do
-        search "foo && bar" "{\"foo\": true, \"bar\": 42}" `shouldBe` Right "42"
-        search "foo && bar" "{\"bar\": 42}" `shouldBe` Right "null"
-
-    context "with a not expression" $
-      it "returns the logical negation of the expression" $
-        search "!foo" "{\"foo\": true}" `shouldBe` Right "false"
-
-    context "with mixed boolean expressions" $
+    context "with boolean expressions" $ do
       it "applies the usual precedence rules" $ do
         search "a || b && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "true"
         search "a && b || c" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "true"
         search "!a && b" "{\"a\": false, \"b\": false}" `shouldBe` Right "false"
 
-    context "with parenthesis" $
-      it "gives precedence to expressions in parenthesis" $ do
-        search "(a || b) && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "false"
-        search "a && (b || c)" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "false"
+      context "||" $
+        it "returns the first non-false expression" $ do
+          search "foo || bar" "{\"foo\": 42}" `shouldBe` Right "42"
+          search "foo || bar" "{\"bar\": 42}" `shouldBe` Right "42"
+          search "foo || bar" "{\"foo\": [], \"bar\": 42}" `shouldBe` Right "42"
+          search "foo || bar" "{\"foo\": {}, \"bar\": 42}" `shouldBe` Right "42"
+          search "foo || bar" "{\"foo\": \"\", \"bar\": 42}" `shouldBe` Right "42"
+          search "foo || bar" "{\"foo\": false, \"bar\": 42}" `shouldBe` Right "42"
 
-    context "with comparators" $
-      context "==" $
-        it "returns true if the two values are equal" $ do
-          search "a == b" "{\"a\": 42, \"b\": 42}" `shouldBe` Right "true"
-          search "a == b" "{\"a\": 42, \"b\": 43}" `shouldBe` Right "false"
+      context "&&" $
+        it "returns the last non-false expression" $ do
+          search "foo && bar" "{\"foo\": true, \"bar\": 42}" `shouldBe` Right "42"
+          search "foo && bar" "{\"bar\": 42}" `shouldBe` Right "null"
+
+      context "!" $
+        it "returns the logical negation of the expression" $
+          search "!foo" "{\"foo\": true}" `shouldBe` Right "false"
+
+      context "parenthesis" $
+        it "gives precedence to expressions in parenthesis" $ do
+          search "(a || b) && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "false"
+          search "a && (b || c)" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "false"
+
+      context "comparators" $
+        context "==" $
+          it "returns true if the two values are equal" $ do
+            search "a == b" "{\"a\": 42, \"b\": 42}" `shouldBe` Right "true"
+            search "a == b" "{\"a\": 42, \"b\": 43}" `shouldBe` Right "false"
