@@ -178,8 +178,45 @@ main = hspec $
           search "(a || b) && c" "{\"a\": true, \"b\": true, \"c\": false}" `shouldBe` Right "false"
           search "a && (b || c)" "{\"a\": false, \"b\": false, \"c\": true}" `shouldBe` Right "false"
 
-      context "comparators" $
+      context "comparators" $ do
+        it "applies the usual precedence rules" $ do
+          search "one < two && three > one" "{\"one\": 1, \"two\": 2, \"three\": 3}" `shouldBe` Right "true"
+          search "one <= two && three >= one" "{\"one\": 1, \"two\": 2, \"three\": 3}" `shouldBe` Right "true"
+          search "one < two == three > one" "{\"one\": 1, \"two\": 2, \"three\": 3}" `shouldBe` Right "true"
+          search "one < two != three > one" "{\"one\": 1, \"two\": 2, \"three\": 3}" `shouldBe` Right "false"
+
         context "==" $
           it "returns true if the two values are equal" $ do
             search "a == b" "{\"a\": 42, \"b\": 42}" `shouldBe` Right "true"
             search "a == b" "{\"a\": 42, \"b\": 43}" `shouldBe` Right "false"
+
+        context "!=" $
+          it "returns true if the two values are not equal" $ do
+            search "a != b" "{\"a\": 42, \"b\": 42}" `shouldBe` Right "false"
+            search "a != b" "{\"a\": 42, \"b\": 43}" `shouldBe` Right "true"
+
+        context "<" $
+          it "returns true if the first number is less than the second" $ do
+            search "a < b" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "true"
+            search "b < a" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "false"
+            search "a < b" "{\"a\": 0, \"b\": []}" `shouldBe` Right "null"
+
+        context ">" $
+          it "returns true if the first number is greater than the second" $ do
+            search "a > b" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "false"
+            search "b > a" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "true"
+            search "a > b" "{\"a\": 0, \"b\": []}" `shouldBe` Right "null"
+
+        context "<=" $
+          it "returns true if the first number is less than or equal the second" $ do
+            search "a <= b" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "true"
+            search "a <= b" "{\"a\": 1, \"b\": 1}" `shouldBe` Right "true"
+            search "b <= a" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "false"
+            search "a <= b" "{\"a\": 0, \"b\": []}" `shouldBe` Right "null"
+
+        context ">=" $
+          it "returns true if the first number is greater than or equal the second" $ do
+            search "a >= b" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "false"
+            search "a >= b" "{\"a\": 1, \"b\": 1}" `shouldBe` Right "true"
+            search "b >= a" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "true"
+            search "a >= b" "{\"a\": 0, \"b\": []}" `shouldBe` Right "null"

@@ -16,6 +16,11 @@ module JMESPath.Json
   , isTruthy
   , bool
   , equal
+  , notEqual
+  , lessThan
+  , greaterThan
+  , lessThanOrEqual
+  , greaterThanOrEqual
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -148,4 +153,23 @@ bool :: Bool -> Value
 bool = Value . Aeson.Bool
 
 equal :: Value -> Value -> Value
-equal x y  = bool $ x == y
+equal left right = bool $ left == right
+
+notEqual :: Value -> Value -> Value
+notEqual left right = bool $ left /= right
+
+lessThan :: Value -> Value -> Value
+lessThan (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left < right
+lessThan _ _ = nullValue
+
+greaterThan :: Value -> Value -> Value
+greaterThan (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left > right
+greaterThan _ _ = nullValue
+
+lessThanOrEqual :: Value -> Value -> Value
+lessThanOrEqual (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left <= right
+lessThanOrEqual _ _ = nullValue
+
+greaterThanOrEqual :: Value -> Value -> Value
+greaterThanOrEqual (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left >= right
+greaterThanOrEqual _ _ = nullValue

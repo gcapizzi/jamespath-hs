@@ -38,10 +38,17 @@ import JMESPath.Ast
     ')' { TokenClosedParen }
     '!' { TokenNot }
     '==' { TokenEqual }
+    '!=' { TokenNotEqual }
+    '<' { TokenLessThan }
+    '>' { TokenGreaterThan }
+    '<=' { TokenLessThanOrEqual }
+    '>=' { TokenGreaterThanOrEqual }
 
 %left '||'
 %left '&&'
 %left '!'
+%left '==' '!='
+%left '<' '>' '<=' '>='
 %%
 
 Expression : FirstExpressionWithProjections { $1 }
@@ -55,6 +62,11 @@ Expression : FirstExpressionWithProjections { $1 }
            | '(' Expression ')' { $2 }
            | '!' Expression { NotExpression $2 }
            | Expression '==' Expression { EqualExpression $1 $3 }
+           | Expression '!=' Expression { NotEqualExpression $1 $3 }
+           | Expression '<' Expression { LessThanExpression $1 $3 }
+           | Expression '>' Expression { GreaterThanExpression $1 $3 }
+           | Expression '<=' Expression { LessThanOrEqualExpression $1 $3 }
+           | Expression '>=' Expression { GreaterThanOrEqualExpression $1 $3 }
 
 FirstExpressionWithProjections : FirstSimpleExpression { $1 }
                                | '[' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $2 $4 Nothing Root Root }

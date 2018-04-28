@@ -71,3 +71,23 @@ searchValue (EqualExpression left right) document = do
     leftValue <- searchValue left document
     rightValue <- searchValue right document
     Right $ Json.equal leftValue rightValue
+searchValue (NotEqualExpression left right) document = do
+    leftValue <- searchValue left document
+    rightValue <- searchValue right document
+    Right $ Json.notEqual leftValue rightValue
+searchValue (LessThanExpression left right) document = do
+    leftValue <- searchValue left document
+    rightValue <- searchValue right document
+    Right $ Json.lessThan leftValue rightValue
+searchValue (GreaterThanExpression left right) document = do
+    leftValue <- searchValue left document
+    rightValue <- searchValue right document
+    Right $ Json.greaterThan leftValue rightValue
+searchValue (LessThanOrEqualExpression left right) document = do
+    leftValue <- searchValue left document
+    rightValue <- searchValue right document
+    Right $ Json.lessThanOrEqual leftValue rightValue
+searchValue (GreaterThanOrEqualExpression left right) document = do
+    leftValue <- searchValue left document
+    rightValue <- searchValue right document
+    Right $ Json.greaterThanOrEqual leftValue rightValue

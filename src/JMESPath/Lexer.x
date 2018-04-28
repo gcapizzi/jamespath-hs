@@ -37,6 +37,11 @@ tokens :-
   \) { \_ -> TokenClosedParen }
   \! { \_ -> TokenNot }
   \=\= { \_ -> TokenEqual }
+  \!\= { \_ -> TokenNotEqual }
+  \< { \_ -> TokenLessThan }
+  \> { \_ -> TokenGreaterThan }
+  \<\= { \_ -> TokenLessThanOrEqual }
+  \>\= { \_ -> TokenGreaterThanOrEqual }
 
 {
 data Token
@@ -59,6 +64,11 @@ data Token
   | TokenClosedParen
   | TokenNot
   | TokenEqual
+  | TokenNotEqual
+  | TokenLessThan
+  | TokenGreaterThan
+  | TokenLessThanOrEqual
+  | TokenGreaterThanOrEqual
   deriving (Eq)
 
 instance Show Token where
@@ -81,6 +91,11 @@ instance Show Token where
   show (TokenClosedParen) = ")"
   show (TokenNot) = "!"
   show (TokenEqual) = "=="
+  show (TokenNotEqual) = "!="
+  show (TokenLessThan) = "<"
+  show (TokenGreaterThan) = ">"
+  show (TokenLessThanOrEqual) = "<="
+  show (TokenGreaterThanOrEqual) = ">="
 
 scanTokens :: String -> Either String [Token]
 scanTokens input = go ('\n', [], input)

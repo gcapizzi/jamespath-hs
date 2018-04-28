@@ -18,4 +18,9 @@ data Expression = Root
                 | AndExpression Expression Expression
                 | NotExpression Expression
                 | EqualExpression Expression Expression
+                | NotEqualExpression Expression Expression
+                | LessThanExpression Expression Expression
+                | GreaterThanExpression Expression Expression
+                | LessThanOrEqualExpression Expression Expression
+                | GreaterThanOrEqualExpression Expression Expression
     deriving Show
