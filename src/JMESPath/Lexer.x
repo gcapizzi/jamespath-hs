@@ -42,6 +42,7 @@ tokens :-
   \> { \_ -> TokenGreaterThan }
   \<\= { \_ -> TokenLessThanOrEqual }
   \>\= { \_ -> TokenGreaterThanOrEqual }
+  \[\? { \_ -> TokenOpenSquareQuestionMark }
 
 {
 data Token
@@ -69,6 +70,7 @@ data Token
   | TokenGreaterThan
   | TokenLessThanOrEqual
   | TokenGreaterThanOrEqual
+  | TokenOpenSquareQuestionMark
   deriving (Eq)
 
 instance Show Token where
@@ -96,6 +98,7 @@ instance Show Token where
   show (TokenGreaterThan) = ">"
   show (TokenLessThanOrEqual) = "<="
   show (TokenGreaterThanOrEqual) = ">="
+  show (TokenOpenSquareQuestionMark) = "[?"
 
 scanTokens :: String -> Either String [Token]
 scanTokens input = go ('\n', [], input)

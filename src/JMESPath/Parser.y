@@ -43,6 +43,7 @@ import JMESPath.Ast
     '>' { TokenGreaterThan }
     '<=' { TokenLessThanOrEqual }
     '>=' { TokenGreaterThanOrEqual }
+    '[?' { TokenOpenSquareQuestionMark }
 
 %left '||'
 %left '&&'
@@ -109,18 +110,22 @@ SimpleExpression : '.' String { KeyExpression $2 Root }
                  | '[' NUMBER ']' { IndexExpression $2 Root }
                  | '.' '[' ExpressionList ']' { MultiSelectList $3 Root }
                  | '.' '{' KeyExpressionPairList '}' { MultiSelectHash $3 Root }
+                 | '[?' Expression ']' { FilterExpression $2 Root }
                  | SimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
                  | SimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
                  | SimpleExpression '.' '{' KeyExpressionPairList '}' { MultiSelectHash $4 $1 }
+                 | SimpleExpression '[?' Expression ']' { FilterExpression $3 $1 }
 
 FirstSimpleExpression : String { KeyExpression $1 Root }
                       | FirstSimpleExpression '.' String { KeyExpression $3 $1 }
                       | '[' NUMBER ']' { IndexExpression $2 Root }
                       | '[' ExpressionList ']' { MultiSelectList $2 Root }
                       | '{' KeyExpressionPairList '}' { MultiSelectHash $2 Root }
+                      | '[?' Expression ']' { FilterExpression $2 Root }
                       | FirstSimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
                       | FirstSimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
                       | FirstSimpleExpression '.' '{' KeyExpressionPairList '}' { MultiSelectHash $4 $1 }
+                      | FirstSimpleExpression '[?' Expression ']' { FilterExpression $3 $1 }
 
 ExpressionList : Expression { [$1] }
                | Expression ',' ExpressionList { $1 : $3 }

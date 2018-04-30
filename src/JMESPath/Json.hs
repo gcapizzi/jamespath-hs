@@ -21,6 +21,7 @@ module JMESPath.Json
   , greaterThan
   , lessThanOrEqual
   , greaterThanOrEqual
+  , filterValue
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -139,15 +140,21 @@ isNull (Value Aeson.Null) = True
 isNull _ = False
 
 isFalsy :: Value -> Bool
-isFalsy (Value Aeson.Null) = True
-isFalsy (Value (Aeson.Array array)) = Vector.null array
-isFalsy (Value (Aeson.Object object)) = HashMap.null object
-isFalsy (Value (Aeson.String string)) = Text.null string
-isFalsy (Value (Aeson.Bool bool)) = not bool
-isFalsy _ = False
+isFalsy (Value aesonValue) = aesonFalsy aesonValue
 
 isTruthy :: Value -> Bool
 isTruthy = not . isFalsy
+
+aesonFalsy :: Aeson.Value -> Bool
+aesonFalsy Aeson.Null = True
+aesonFalsy (Aeson.Array array) = Vector.null array
+aesonFalsy (Aeson.Object object) = HashMap.null object
+aesonFalsy (Aeson.String string) = Text.null string
+aesonFalsy (Aeson.Bool bool) = not bool
+aesonFalsy _ = False
+
+aesonTruthy :: Aeson.Value -> Bool
+aesonTruthy = not . aesonFalsy
 
 bool :: Bool -> Value
 bool = Value . Aeson.Bool
@@ -173,3 +180,10 @@ lessThanOrEqual _ _ = nullValue
 greaterThanOrEqual :: Value -> Value -> Value
 greaterThanOrEqual (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left >= right
 greaterThanOrEqual _ _ = nullValue
+
+filterValue :: Monad m => (Value -> m Value) -> Value -> m Value
+filterValue f (Value (Aeson.Array array)) = Value <$> filterValues (fmap toAeson . f . fromAeson) array
+filterValue _ _ = return nullValue
+
+filterValues :: Monad m => (Aeson.Value -> m Aeson.Value) -> Vector Aeson.Value -> m Aeson.Value
+filterValues f values = Aeson.Array <$> Vector.filterM (fmap aesonTruthy . f) values

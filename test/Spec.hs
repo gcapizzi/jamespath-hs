@@ -221,3 +221,10 @@ main = hspec $
             search "a >= b" "{\"a\": 1, \"b\": 1}" `shouldBe` Right "true"
             search "b >= a" "{\"a\": 0, \"b\": 1}" `shouldBe` Right "true"
             search "a >= b" "{\"a\": 0, \"b\": []}" `shouldBe` Right "null"
+
+    context "with a filter expression" $
+      it "keeps the element that make the expression return a truthy value" $ do
+        search "[?a == b]" "[{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]" `shouldBe` Right "[{\"a\":1,\"b\":1}]"
+        search "foo[?a == b]" "{\"foo\": [{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]}" `shouldBe` Right "[{\"a\":1,\"b\":1}]"
+        search "[*][?a == b]" "[[{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]]" `shouldBe` Right "[[{\"a\":1,\"b\":1}]]"
+        search "[*].foo[?a == b]" "[{\"foo\": [{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]}]" `shouldBe` Right "[[{\"a\":1,\"b\":1}]]"
