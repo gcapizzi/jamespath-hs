@@ -139,6 +139,7 @@ main = hspec $
         search "foo.[one, two]" "{\"foo\": {\"one\": 1, \"two\": 2}}" `shouldBe` Right "[1,2]"
         search "foo[*].[one, two]" "{\"foo\": [{\"one\": 1, \"two\": 2}]}" `shouldBe` Right "[[1,2]]"
         search "foo[*][0].[one, two]" "{\"foo\": [[{\"one\": 1, \"two\": 2}]]}" `shouldBe` Right "[[1,2]]"
+        search "foo.[bar]" "{}" `shouldBe` Right "null"
 
     context "with a multiselect hash" $
       it "returns an object with the same keys and expression results as values" $ do
