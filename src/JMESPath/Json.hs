@@ -2,8 +2,8 @@ module JMESPath.Json
   ( Value
   , decode
   , encode
-  , getKey
-  , getIndex
+  , lookupKey
+  , lookupIndex
   , slice
   , mapArray
   , mapObject
@@ -41,18 +41,16 @@ decode document = Value <$> (Aeson.eitherDecode document :: Either String Aeson.
 encode :: Value -> ByteString
 encode (Value value) = Aeson.encode value
 
-getKey :: Text -> Value -> Value
-getKey key (Value value) = Value $ lookupOrNull key value
 
-lookupOrNull :: Text -> Aeson.Value -> Aeson.Value
-lookupOrNull key (Aeson.Object object) = HashMap.lookupDefault Aeson.Null key object
-lookupOrNull _ _ = Aeson.Null
+lookupKey :: Text -> Value -> Value
+lookupKey key (Value (Aeson.Object object)) = Value $ HashMap.lookupDefault Aeson.Null key object
+lookupKey _ _ = nullValue
 
-getIndex :: Int -> Value -> Value
-getIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null $ array Vector.!? normalizedIndex
+lookupIndex :: Int -> Value -> Value
+lookupIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null $ array Vector.!? normalizedIndex
   where
     normalizedIndex = if index < 0 then Vector.length array + index else index
-getIndex _ _ = nullValue
+lookupIndex _ _ = nullValue
 
 slice :: Maybe Int -> Maybe Int -> Maybe Int -> Value -> Either String Value
 slice _ _ (Just 0) _ = Left "Error: slice step cannot be 0"

@@ -8,11 +8,11 @@ import qualified JMESPath.Json as Json
 
 searchValue :: Expression -> Json.Value -> Either String Json.Value
 searchValue Root document = Right document
-searchValue (KeyExpression key Root) document = Right $ Json.getKey key document
+searchValue (KeyExpression key Root) document = Right $ Json.lookupKey key document
 searchValue (KeyExpression key expression) document = do
     value <- searchValue expression document
     searchValue (KeyExpression key Root) value
-searchValue (IndexExpression index Root) document = Right $ Json.getIndex index document
+searchValue (IndexExpression index Root) document = Right $ Json.lookupIndex index document
 searchValue (IndexExpression index expression) document = do
     value <- searchValue expression document
     searchValue (IndexExpression index Root) value
