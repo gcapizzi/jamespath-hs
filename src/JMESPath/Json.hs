@@ -1,27 +1,33 @@
 module JMESPath.Json
   ( Value
+  -- decode and encode
   , decode
   , encode
+  -- getters
   , lookupKey
   , lookupIndex
   , slice
+  -- high order functions
   , mapArray
   , mapObject
   , flatMap
+  , filterValue
+  -- constructors
   , nullValue
   , array
   , object
+  , bool
+  -- predicates
   , isNull
   , isFalsy
   , isTruthy
-  , bool
+  -- comparators
   , equal
   , notEqual
   , lessThan
   , greaterThan
   , lessThanOrEqual
   , greaterThanOrEqual
-  , filterValue
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -35,12 +41,15 @@ import qualified Data.Vector as Vector
 
 newtype Value = Value Aeson.Value deriving (Show, Eq)
 
+-- decode and encode
+
 decode :: ByteString -> Either String Value
 decode document = Value <$> (Aeson.eitherDecode document :: Either String Aeson.Value)
 
 encode :: Value -> ByteString
 encode (Value value) = Aeson.encode value
 
+-- getters
 
 lookupKey :: Text -> Value -> Value
 lookupKey key (Value (Aeson.Object object)) = Value $ HashMap.lookupDefault Aeson.Null key object
@@ -91,6 +100,8 @@ eachEvery step xs
     x = Vector.head xs
     rst = Vector.drop step xs
 
+-- high order functions
+
 mapArray :: Monad m => (Value -> m Value) -> Value -> m Value
 mapArray f (Value (Aeson.Array array)) = Value <$> mapValues (fmap toAeson . f . fromAeson) array
 mapArray _ _ = return nullValue
@@ -118,20 +129,28 @@ flattenArray (Value (Aeson.Array array)) = Value $ Aeson.Array $ Vector.foldr f 
     f v acc = Vector.cons v acc
 flattenArray _ = nullValue
 
-fromAeson :: Aeson.Value -> Value
-fromAeson = Value
+filterValue :: Monad m => (Value -> m Value) -> Value -> m Value
+filterValue f (Value (Aeson.Array array)) = Value <$> filterValues (fmap toAeson . f . fromAeson) array
+filterValue _ _ = return nullValue
 
-toAeson :: Value -> Aeson.Value
-toAeson (Value v) = v
+filterValues :: Monad m => (Aeson.Value -> m Aeson.Value) -> Vector Aeson.Value -> m Aeson.Value
+filterValues f values = Aeson.Array <$> Vector.filterM (fmap aesonTruthy . f) values
+
+-- constructors
 
 nullValue :: Value
 nullValue = Value Aeson.Null
+
+bool :: Bool -> Value
+bool = Value . Aeson.Bool
 
 array :: [Value] -> Value
 array values = Value $ Aeson.Array $ Vector.fromList $ map toAeson values
 
 object :: [(Text, Value)] -> Value
 object pairs = Value $ Aeson.Object $ HashMap.fromList $ map (fmap toAeson) pairs
+
+-- predicates
 
 isNull :: Value -> Bool
 isNull (Value Aeson.Null) = True
@@ -154,8 +173,7 @@ aesonFalsy _ = False
 aesonTruthy :: Aeson.Value -> Bool
 aesonTruthy = not . aesonFalsy
 
-bool :: Bool -> Value
-bool = Value . Aeson.Bool
+-- comparators
 
 equal :: Value -> Value -> Value
 equal left right = bool $ left == right
@@ -179,9 +197,11 @@ greaterThanOrEqual :: Value -> Value -> Value
 greaterThanOrEqual (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left >= right
 greaterThanOrEqual _ _ = nullValue
 
-filterValue :: Monad m => (Value -> m Value) -> Value -> m Value
-filterValue f (Value (Aeson.Array array)) = Value <$> filterValues (fmap toAeson . f . fromAeson) array
-filterValue _ _ = return nullValue
+-- to/from Aeson
 
-filterValues :: Monad m => (Aeson.Value -> m Aeson.Value) -> Vector Aeson.Value -> m Aeson.Value
-filterValues f values = Aeson.Array <$> Vector.filterM (fmap aesonTruthy . f) values
+toAeson :: Value -> Aeson.Value
+toAeson (Value v) = v
+
+fromAeson :: Aeson.Value -> Value
+fromAeson = Value
+
