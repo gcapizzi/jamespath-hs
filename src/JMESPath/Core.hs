@@ -24,7 +24,7 @@ searchValue (ObjectProjectExpression Root expression) document = Json.mapObject 
 searchValue (ObjectProjectExpression left right) document = do
     value <- searchValue left document
     searchValue (ObjectProjectExpression Root right) value
-searchValue (FlattenExpression Root expression) document = Json.flatMap (searchValue expression) document
+searchValue (FlattenExpression Root expression) document = Json.flatMapArray (searchValue expression) document
 searchValue (FlattenExpression left right) document = do
     value <- searchValue left document
     searchValue (FlattenExpression Root right) value
@@ -39,7 +39,7 @@ searchValue (PipeExpression left right) document = do
     searchValue right value
 searchValue (MultiSelectList expressions Root) document =
     if Json.isNull document
-        then Right Json.nullValue
+        then Right Json.null
         else do
             values <- mapM (`searchValue` document) expressions
             Right $ Json.array values
@@ -48,7 +48,7 @@ searchValue (MultiSelectList expressions expression) document = do
     searchValue (MultiSelectList expressions Root) value
 searchValue (MultiSelectHash pairs Root) document =
     if Json.isNull document
-        then Right Json.nullValue
+        then Right Json.null
         else do
             valuePairs <- mapM (mapM (`searchValue` document)) pairs
             Right $ Json.object valuePairs
@@ -94,7 +94,7 @@ searchValue (GreaterThanOrEqualExpression left right) document = do
     leftValue <- searchValue left document
     rightValue <- searchValue right document
     Right $ Json.greaterThanOrEqual leftValue rightValue
-searchValue (FilterExpression filter Root) document = Json.filterValue (searchValue filter) document
+searchValue (FilterExpression filter Root) document = Json.filterArray (searchValue filter) document
 searchValue (FilterExpression filter expression) document = do
     value <- searchValue expression document
     searchValue (FilterExpression filter Root) value

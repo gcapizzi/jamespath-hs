@@ -10,10 +10,10 @@ module JMESPath.Json
   -- high order functions
   , mapArray
   , mapObject
-  , flatMap
-  , filterValue
+  , flatMapArray
+  , filterArray
   -- constructors
-  , nullValue
+  , null
   , array
   , object
   , bool
@@ -33,6 +33,7 @@ module JMESPath.Json
 import Data.ByteString.Lazy (ByteString)
 import Data.Text (Text)
 import Data.Vector (Vector)
+import Prelude hiding (null)
 import qualified Data.Aeson as Aeson
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
@@ -53,13 +54,13 @@ encode (Value value) = Aeson.encode value
 
 lookupKey :: Text -> Value -> Value
 lookupKey key (Value (Aeson.Object object)) = Value $ HashMap.lookupDefault Aeson.Null key object
-lookupKey _ _ = nullValue
+lookupKey _ _ = null
 
 lookupIndex :: Int -> Value -> Value
 lookupIndex index (Value (Aeson.Array array)) = Value $ Maybe.fromMaybe Aeson.Null $ array Vector.!? normalizedIndex
   where
     normalizedIndex = if index < 0 then Vector.length array + index else index
-lookupIndex _ _ = nullValue
+lookupIndex _ _ = null
 
 slice :: Maybe Int -> Maybe Int -> Maybe Int -> Value -> Either String Value
 slice _ _ (Just 0) _ = Left "Error: slice step cannot be 0"
@@ -75,7 +76,7 @@ slice maybeFrom maybeTo maybeStep (Value (Aeson.Array array))
     to = Maybe.maybe (if step < 0 then -1 else len) (capSlice step len) maybeTo
     step = Maybe.fromMaybe 1 maybeStep
     len = Vector.length array
-slice _ _ _ _ = Right nullValue
+slice _ _ _ _ = Right null
 
 capSlice :: Int -> Int -> Int -> Int
 capSlice step len actual
@@ -104,13 +105,13 @@ eachEvery step xs
 
 mapArray :: Monad m => (Value -> m Value) -> Value -> m Value
 mapArray f (Value (Aeson.Array array)) = Value <$> mapValues (fmap toAeson . f . fromAeson) array
-mapArray _ _ = return nullValue
+mapArray _ _ = return null
 
 mapObject :: Monad m => (Value -> m Value) -> Value -> m Value
 mapObject f (Value (Aeson.Object object)) = Value <$> mapValues (fmap toAeson . f . fromAeson) elems
   where
     elems = Vector.fromList $ HashMap.elems object
-mapObject _ _ = return nullValue
+mapObject _ _ = return null
 
 mapValues :: Monad m => (Aeson.Value -> m Aeson.Value) -> Vector Aeson.Value -> m Aeson.Value
 mapValues f values = do
@@ -118,8 +119,8 @@ mapValues f values = do
     let result = Vector.filter (/= Aeson.Null) resultWithNulls
     return $ Aeson.Array result
 
-flatMap :: Monad m => (Value -> m Value) -> Value -> m Value
-flatMap f value = mapArray f $ flattenArray value
+flatMapArray :: Monad m => (Value -> m Value) -> Value -> m Value
+flatMapArray f value = mapArray f $ flattenArray value
 
 flattenArray :: Value -> Value
 flattenArray (Value (Aeson.Array array)) = Value $ Aeson.Array $ Vector.foldr f Vector.empty array
@@ -127,19 +128,19 @@ flattenArray (Value (Aeson.Array array)) = Value $ Aeson.Array $ Vector.foldr f 
     f (Aeson.Array subarray) acc = Vector.filter (/= Aeson.Null) subarray Vector.++ acc
     f Aeson.Null acc = acc
     f v acc = Vector.cons v acc
-flattenArray _ = nullValue
+flattenArray _ = null
 
-filterValue :: Monad m => (Value -> m Value) -> Value -> m Value
-filterValue f (Value (Aeson.Array array)) = Value <$> filterValues (fmap toAeson . f . fromAeson) array
-filterValue _ _ = return nullValue
+filterArray :: Monad m => (Value -> m Value) -> Value -> m Value
+filterArray f (Value (Aeson.Array array)) = Value <$> filterValues (fmap toAeson . f . fromAeson) array
+filterArray _ _ = return null
 
 filterValues :: Monad m => (Aeson.Value -> m Aeson.Value) -> Vector Aeson.Value -> m Aeson.Value
-filterValues f values = Aeson.Array <$> Vector.filterM (fmap aesonTruthy . f) values
+filterValues f values = Aeson.Array <$> Vector.filterM (fmap isAesonTruthy . f) values
 
 -- constructors
 
-nullValue :: Value
-nullValue = Value Aeson.Null
+null :: Value
+null = Value Aeson.Null
 
 bool :: Bool -> Value
 bool = Value . Aeson.Bool
@@ -157,21 +158,21 @@ isNull (Value Aeson.Null) = True
 isNull _ = False
 
 isFalsy :: Value -> Bool
-isFalsy (Value aesonValue) = aesonFalsy aesonValue
+isFalsy (Value aesonValue) = isAesonFalsy aesonValue
 
 isTruthy :: Value -> Bool
 isTruthy = not . isFalsy
 
-aesonFalsy :: Aeson.Value -> Bool
-aesonFalsy Aeson.Null = True
-aesonFalsy (Aeson.Array array) = Vector.null array
-aesonFalsy (Aeson.Object object) = HashMap.null object
-aesonFalsy (Aeson.String string) = Text.null string
-aesonFalsy (Aeson.Bool bool) = not bool
-aesonFalsy _ = False
+isAesonFalsy :: Aeson.Value -> Bool
+isAesonFalsy Aeson.Null = True
+isAesonFalsy (Aeson.Array array) = Vector.null array
+isAesonFalsy (Aeson.Object object) = HashMap.null object
+isAesonFalsy (Aeson.String string) = Text.null string
+isAesonFalsy (Aeson.Bool bool) = not bool
+isAesonFalsy _ = False
 
-aesonTruthy :: Aeson.Value -> Bool
-aesonTruthy = not . aesonFalsy
+isAesonTruthy :: Aeson.Value -> Bool
+isAesonTruthy = not . isAesonFalsy
 
 -- comparators
 
@@ -183,19 +184,19 @@ notEqual left right = bool $ left /= right
 
 lessThan :: Value -> Value -> Value
 lessThan (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left < right
-lessThan _ _ = nullValue
+lessThan _ _ = null
 
 greaterThan :: Value -> Value -> Value
 greaterThan (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left > right
-greaterThan _ _ = nullValue
+greaterThan _ _ = null
 
 lessThanOrEqual :: Value -> Value -> Value
 lessThanOrEqual (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left <= right
-lessThanOrEqual _ _ = nullValue
+lessThanOrEqual _ _ = null
 
 greaterThanOrEqual :: Value -> Value -> Value
 greaterThanOrEqual (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left >= right
-greaterThanOrEqual _ _ = nullValue
+greaterThanOrEqual _ _ = null
 
 -- to/from Aeson
 
