@@ -101,14 +101,15 @@ instance Show Token where
   show (TokenOpenSquareQuestionMark) = "[?"
 
 scanTokens :: String -> Either String [Token]
-scanTokens input = go ('\n', [], input)
-  where
-    go inp@(_, _, str) = case alexScan inp 0 of
-        AlexEOF -> return []
-        AlexError (_, _, rst) -> Left ("Syntax error: unexpected input '" ++ rst ++ "'")
-        AlexSkip inp' _ -> go inp'
-        AlexToken inp' len act -> do
-            res <- go inp'
-            let rest = act (take len str)
-            return (rest:res)
+scanTokens inputString = scan ('\n', [], inputString)
+
+scan :: AlexInput -> Either String [Token]
+scan input@(_, _, inputString) = case alexScan input 0 of
+    AlexEOF -> return []
+    AlexError (_, _, remainingInputString) -> Left ("Syntax error: unexpected input '" ++ remainingInputString ++ "'")
+    AlexSkip remainingInput _ -> scan remainingInput
+    AlexToken remainingInput tokenLength action -> do
+        remainingTokens <- scan remainingInput
+        let token = action (take tokenLength inputString)
+        return (token:remainingTokens)
 }
