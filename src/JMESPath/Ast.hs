@@ -26,4 +26,5 @@ data Expression = Root
                 | FilterExpression Expression Expression
                 | JsonExpression String
                 | JsonRawStringExpression String
+                | CurrentNodeExpression
     deriving Show

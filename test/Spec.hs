@@ -232,3 +232,7 @@ main = hspec $
       it "parses the JSON" $ do
         search "`{\"foo\": \"bar\"}`" "{}" `shouldBe` Right "{\"foo\":\"bar\"}"
         search "'foo'" "{}" `shouldBe` Right "\"foo\""
+
+    context "with a current-node expression" $
+      it "returns the current element" $
+        search "[?@ < `2`]" "[1, 2, 3]" `shouldBe` Right "[1]"

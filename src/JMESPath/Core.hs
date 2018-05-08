@@ -100,3 +100,4 @@ searchValue (FilterExpression boolExpression expression) document = do
     searchValue (FilterExpression boolExpression Root) value
 searchValue (JsonExpression json) _ = Json.decodeString json
 searchValue (JsonRawStringExpression jsonRawString) _ = Right $ Json.string jsonRawString
+searchValue CurrentNodeExpression document = Right document

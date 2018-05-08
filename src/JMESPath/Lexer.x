@@ -45,6 +45,7 @@ tokens :-
   \[\? { \_ -> TokenOpenSquareQuestionMark }
   `[^`]+` { \s -> TokenJson (tail (init s)) }
   '[^']+' { \s -> TokenJsonRawString (tail (init s)) }
+  @ { \_ -> TokenAt }
 
 {
 data Token
@@ -76,6 +77,7 @@ data Token
   | TokenBacktick
   | TokenJson String
   | TokenJsonRawString String
+  | TokenAt
   deriving (Eq)
 
 instance Show Token where
@@ -107,6 +109,7 @@ instance Show Token where
   show (TokenBacktick) = "`"
   show (TokenJson s) = s
   show (TokenJsonRawString s) = s
+  show (TokenAt) = "@"
 
 scanTokens :: String -> Either String [Token]
 scanTokens inputString = scan ('\n', [], inputString)

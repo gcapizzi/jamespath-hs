@@ -47,6 +47,7 @@ import JMESPath.Ast
     '`' { TokenBacktick }
     JSON { TokenJson $$ }
     JSON_RAW_STRING { TokenJsonRawString $$ }
+    '@' { TokenAt }
 
 %left '||'
 %left '&&'
@@ -131,6 +132,7 @@ FirstSimpleExpression : String { KeyExpression $1 Root }
                       | FirstSimpleExpression '[?' Expression ']' { FilterExpression $3 $1 }
                       | JSON { JsonExpression $1 }
                       | JSON_RAW_STRING { JsonRawStringExpression $1 }
+                      | '@' { CurrentNodeExpression }
 
 ExpressionList : Expression { [$1] }
                | Expression ',' ExpressionList { $1 : $3 }
