@@ -98,3 +98,5 @@ searchValue (FilterExpression boolExpression Root) document = Json.filterArray (
 searchValue (FilterExpression boolExpression expression) document = do
     value <- searchValue expression document
     searchValue (FilterExpression boolExpression Root) value
+searchValue (JsonExpression json) _ = Json.decodeString json
+searchValue (JsonRawStringExpression jsonRawString) _ = Right $ Json.string jsonRawString

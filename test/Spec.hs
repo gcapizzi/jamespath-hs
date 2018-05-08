@@ -10,7 +10,6 @@ main = hspec $
   describe "JMESPath.search" $ do
     context "when syntax is invalid" $
       it "fails" $ do
-        search "^foo" "{}" `shouldBe` Left "Syntax error: unexpected input '^foo'"
         search "" "{}" `shouldBe` Left "Syntax error: unexpected end of input"
         fromLeft "" (search ".foo" "{}") `shouldSatisfy` isPrefixOf "Syntax error: unexpected token '.'"
 
@@ -228,3 +227,8 @@ main = hspec $
         search "foo[?a == b]" "{\"foo\": [{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]}" `shouldBe` Right "[{\"a\":1,\"b\":1}]"
         search "[*][?a == b]" "[[{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]]" `shouldBe` Right "[[{\"a\":1,\"b\":1}]]"
         search "[*].foo[?a == b]" "[{\"foo\": [{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]}]" `shouldBe` Right "[[{\"a\":1,\"b\":1}]]"
+
+    context "with literals" $
+      it "parses the JSON" $ do
+        search "`{\"foo\": \"bar\"}`" "{}" `shouldBe` Right "{\"foo\":\"bar\"}"
+        search "'foo'" "{}" `shouldBe` Right "\"foo\""

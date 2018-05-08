@@ -44,6 +44,9 @@ import JMESPath.Ast
     '<=' { TokenLessThanOrEqual }
     '>=' { TokenGreaterThanOrEqual }
     '[?' { TokenOpenSquareQuestionMark }
+    '`' { TokenBacktick }
+    JSON { TokenJson $$ }
+    JSON_RAW_STRING { TokenJsonRawString $$ }
 
 %left '||'
 %left '&&'
@@ -126,6 +129,8 @@ FirstSimpleExpression : String { KeyExpression $1 Root }
                       | FirstSimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
                       | FirstSimpleExpression '.' '{' KeyExpressionPairList '}' { MultiSelectHash $4 $1 }
                       | FirstSimpleExpression '[?' Expression ']' { FilterExpression $3 $1 }
+                      | JSON { JsonExpression $1 }
+                      | JSON_RAW_STRING { JsonRawStringExpression $1 }
 
 ExpressionList : Expression { [$1] }
                | Expression ',' ExpressionList { $1 : $3 }

@@ -24,4 +24,6 @@ data Expression = Root
                 | LessThanOrEqualExpression Expression Expression
                 | GreaterThanOrEqualExpression Expression Expression
                 | FilterExpression Expression Expression
+                | JsonExpression String
+                | JsonRawStringExpression String
     deriving Show

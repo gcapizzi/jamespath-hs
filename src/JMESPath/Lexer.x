@@ -43,6 +43,8 @@ tokens :-
   \<\= { \_ -> TokenLessThanOrEqual }
   \>\= { \_ -> TokenGreaterThanOrEqual }
   \[\? { \_ -> TokenOpenSquareQuestionMark }
+  `[^`]+` { \s -> TokenJson (tail (init s)) }
+  '[^']+' { \s -> TokenJsonRawString (tail (init s)) }
 
 {
 data Token
@@ -71,6 +73,9 @@ data Token
   | TokenLessThanOrEqual
   | TokenGreaterThanOrEqual
   | TokenOpenSquareQuestionMark
+  | TokenBacktick
+  | TokenJson String
+  | TokenJsonRawString String
   deriving (Eq)
 
 instance Show Token where
@@ -99,6 +104,9 @@ instance Show Token where
   show (TokenLessThanOrEqual) = "<="
   show (TokenGreaterThanOrEqual) = ">="
   show (TokenOpenSquareQuestionMark) = "[?"
+  show (TokenBacktick) = "`"
+  show (TokenJson s) = s
+  show (TokenJsonRawString s) = s
 
 scanTokens :: String -> Either String [Token]
 scanTokens inputString = scan ('\n', [], inputString)

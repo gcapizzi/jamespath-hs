@@ -2,6 +2,7 @@ module JMESPath.Json
   ( Value
   -- decode and encode
   , decode
+  , decodeString
   , encode
   -- getters
   , lookupKey
@@ -17,6 +18,7 @@ module JMESPath.Json
   , array
   , object
   , bool
+  , string
   -- predicates
   , isNull
   , isFalsy
@@ -35,6 +37,7 @@ import Data.Text (Text)
 import Data.Vector (Vector)
 import Prelude hiding (null)
 import qualified Data.Aeson as Aeson
+import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
@@ -46,6 +49,9 @@ newtype Value = Value Aeson.Value deriving (Show, Eq)
 
 decode :: ByteString -> Either String Value
 decode document = Value <$> (Aeson.eitherDecode document :: Either String Aeson.Value)
+
+decodeString :: String -> Either String Value
+decodeString = decode . ByteString.pack
 
 encode :: Value -> ByteString
 encode (Value value) = Aeson.encode value
@@ -150,6 +156,9 @@ array values = Value $ Aeson.Array $ Vector.fromList $ map toAeson values
 
 object :: [(Text, Value)] -> Value
 object pairs = Value $ Aeson.Object $ HashMap.fromList $ map (fmap toAeson) pairs
+
+string :: String -> Value
+string = Value . Aeson.String . Text.pack
 
 -- predicates
 
