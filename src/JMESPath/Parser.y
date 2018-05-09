@@ -78,18 +78,22 @@ FirstExpressionWithProjections : FirstSimpleExpression { $1 }
                                | '[' opt(NUMBER) ':' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $2 $4 $6 Root Root }
                                | '[' '*' ']' { ArrayProjectExpression Root Root }
                                | '*' { ObjectProjectExpression Root Root }
+                               | '[?' Expression ']' { FilterExpression $2 Root Root }
                                | '[' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $2 $4 Nothing Root $6 }
                                | '[' opt(NUMBER) ':' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $2 $4 $6 Root $8 }
                                | '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression Root $4 }
                                | '*' ExpressionWithProjections { ObjectProjectExpression Root $2 }
+                               | '[?' Expression ']' ExpressionWithProjections { FilterExpression $2 Root $4 }
                                | FirstSimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $3 $5 Nothing $1 Root }
                                | FirstSimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $3 $5 $7 $1 Root }
                                | FirstSimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
                                | FirstSimpleExpression '.' '*' { ObjectProjectExpression $1 Root }
+                               | FirstSimpleExpression '[?' Expression ']' { FilterExpression $3 $1 Root }
                                | FirstSimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $3 $5 Nothing $1 $7 }
                                | FirstSimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $3 $5 $7 $1 $9 }
                                | FirstSimpleExpression '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression $1 $5 }
                                | FirstSimpleExpression '.' '*' ExpressionWithProjections { ObjectProjectExpression $1 $4 }
+                               | FirstSimpleExpression '[?' Expression ']' ExpressionWithProjections { FilterExpression $3 $1 $5 }
 
 ExpressionWithProjections : SimpleExpression { $1 }
                           | '[' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $2 $4 Nothing Root Root }
@@ -97,39 +101,39 @@ ExpressionWithProjections : SimpleExpression { $1 }
                           | '[' '*' ']' { ArrayProjectExpression Root Root }
                           | '.' '*' { ObjectProjectExpression Root Root }
                           | '[' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $2 $4 Nothing Root $6 }
+                          | '[?' Expression ']' { FilterExpression $2 Root Root }
                           | '[' opt(NUMBER) ':' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $2 $4 $6 Root $8 }
                           | '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression Root $4 }
                           | '.' '*' ExpressionWithProjections { ObjectProjectExpression Root $3 }
+                          | '[?' Expression ']' ExpressionWithProjections { FilterExpression $2 Root $4 }
                           | SimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $3 $5 Nothing $1 Root }
                           | SimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ':' opt(NUMBER) ']' { SliceExpression $3 $5 $7 $1 Root }
                           | SimpleExpression '[' '*' ']' { ArrayProjectExpression $1 Root }
                           | SimpleExpression '.' '*' { ObjectProjectExpression $1 Root }
+                          | SimpleExpression '[?' Expression ']' { FilterExpression $3 $1 Root }
                           | SimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $3 $5 Nothing $1 $7 }
                           | SimpleExpression '[' opt(NUMBER) ':' opt(NUMBER) ':' opt(NUMBER) ']' ExpressionWithProjections { SliceExpression $3 $5 $7 $1 $9 }
                           | SimpleExpression '[' '*' ']' ExpressionWithProjections { ArrayProjectExpression $1 $5 }
                           | SimpleExpression '.' '*' ExpressionWithProjections { ObjectProjectExpression $1 $4 }
+                          | SimpleExpression '[?' Expression ']' ExpressionWithProjections { FilterExpression $3 $1 $5 }
 
 SimpleExpression : '.' String { KeyExpression $2 Root }
                  | SimpleExpression '.' String { KeyExpression $3 $1 }
                  | '[' NUMBER ']' { IndexExpression $2 Root }
                  | '.' '[' ExpressionList ']' { MultiSelectList $3 Root }
                  | '.' '{' KeyExpressionPairList '}' { MultiSelectHash $3 Root }
-                 | '[?' Expression ']' { FilterExpression $2 Root }
                  | SimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
                  | SimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
                  | SimpleExpression '.' '{' KeyExpressionPairList '}' { MultiSelectHash $4 $1 }
-                 | SimpleExpression '[?' Expression ']' { FilterExpression $3 $1 }
 
 FirstSimpleExpression : String { KeyExpression $1 Root }
                       | FirstSimpleExpression '.' String { KeyExpression $3 $1 }
                       | '[' NUMBER ']' { IndexExpression $2 Root }
                       | '[' ExpressionList ']' { MultiSelectList $2 Root }
                       | '{' KeyExpressionPairList '}' { MultiSelectHash $2 Root }
-                      | '[?' Expression ']' { FilterExpression $2 Root }
                       | FirstSimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
                       | FirstSimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
                       | FirstSimpleExpression '.' '{' KeyExpressionPairList '}' { MultiSelectHash $4 $1 }
-                      | FirstSimpleExpression '[?' Expression ']' { FilterExpression $3 $1 }
                       | JSON { JsonExpression $1 }
                       | JSON_RAW_STRING { JsonRawStringExpression $1 }
                       | '@' { CurrentNodeExpression }

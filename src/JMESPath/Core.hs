@@ -94,10 +94,12 @@ searchValue (GreaterThanOrEqualExpression left right) document = do
     leftValue <- searchValue left document
     rightValue <- searchValue right document
     Right $ Json.greaterThanOrEqual leftValue rightValue
-searchValue (FilterExpression boolExpression Root) document = Json.filterArray (searchValue boolExpression) document
-searchValue (FilterExpression boolExpression expression) document = do
-    value <- searchValue expression document
-    searchValue (FilterExpression boolExpression Root) value
+searchValue (FilterExpression boolExpression Root expression) document = do
+    filteredValue <- Json.filterArray (searchValue boolExpression) document
+    Json.mapArray (searchValue expression) filteredValue
+searchValue (FilterExpression boolExpression left right) document = do
+    value <- searchValue left document
+    searchValue (FilterExpression boolExpression Root right) value
 searchValue (JsonExpression json) _ = Json.decodeString json
 searchValue (JsonRawStringExpression jsonRawString) _ = Right $ Json.string jsonRawString
 searchValue CurrentNodeExpression document = Right document

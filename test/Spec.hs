@@ -227,6 +227,7 @@ main = hspec $
         search "foo[?a == b]" "{\"foo\": [{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]}" `shouldBe` Right "[{\"a\":1,\"b\":1}]"
         search "[*][?a == b]" "[[{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]]" `shouldBe` Right "[[{\"a\":1,\"b\":1}]]"
         search "[*].foo[?a == b]" "[{\"foo\": [{\"a\": 1, \"b\": 2}, {\"a\": 1, \"b\": 1}]}]" `shouldBe` Right "[[{\"a\":1,\"b\":1}]]"
+        search "[?first == last].first" "[{\"first\": 1, \"last\": 2}, {\"first\": 1, \"last\": 1}]" `shouldBe` Right "[1]"
 
     context "with literals" $
       it "parses the JSON" $ do

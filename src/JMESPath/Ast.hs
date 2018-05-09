@@ -23,7 +23,7 @@ data Expression = Root
                 | GreaterThanExpression Expression Expression
                 | LessThanOrEqualExpression Expression Expression
                 | GreaterThanOrEqualExpression Expression Expression
-                | FilterExpression Expression Expression
+                | FilterExpression Expression Expression Expression
                 | JsonExpression String
                 | JsonRawStringExpression String
                 | CurrentNodeExpression
