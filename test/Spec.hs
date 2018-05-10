@@ -237,3 +237,14 @@ main = hspec $
     context "with a current-node expression" $
       it "returns the current element" $
         search "[?@ < `2`]" "[1, 2, 3]" `shouldBe` Right "[1]"
+
+    context "with a function call" $ do
+      context "when the function does not exist" $
+        it "returns an error" $
+          search "foo(bar)" "{}" `shouldBe` Left "undefined function 'foo'"
+
+      it "evaluates the function call" $ do
+        search "abs(foo)" "{\"foo\": -1}" `shouldBe` Right "1"
+        search "abs(foo)" "{\"foo\": 1}" `shouldBe` Right "1"
+        search "abs(foo)" "{\"foo\": \"bar\"}" `shouldBe` Left "abs: invalid type of argument '\"bar\"'"
+        search "abs(foo, bar)" "{}" `shouldBe` Left "abs: invalid arity, expected one argument"

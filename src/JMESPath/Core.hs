@@ -4,6 +4,7 @@ module JMESPath.Core
     ) where
 
 import JMESPath.Ast
+import qualified JMESPath.Function as Function
 import qualified JMESPath.Json as Json
 
 searchValue :: Expression -> Json.Value -> Either String Json.Value
@@ -103,3 +104,6 @@ searchValue (FilterExpression boolExpression left right) document = do
 searchValue (JsonExpression json) _ = Json.decodeString json
 searchValue (JsonRawStringExpression jsonRawString) _ = Right $ Json.string jsonRawString
 searchValue CurrentNodeExpression document = Right document
+searchValue (FunctionCallExpression functionName expressions) document = do
+    args <- mapM (`searchValue` document) expressions
+    Function.call functionName args

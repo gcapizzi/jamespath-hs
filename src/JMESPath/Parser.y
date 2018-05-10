@@ -137,6 +137,7 @@ FirstSimpleExpression : String { KeyExpression $1 Root }
                       | JSON { JsonExpression $1 }
                       | JSON_RAW_STRING { JsonRawStringExpression $1 }
                       | '@' { CurrentNodeExpression }
+                      | UNQUOTED_STRING '(' ExpressionList ')' { FunctionCallExpression $1 $3 }
 
 ExpressionList : Expression { [$1] }
                | Expression ',' ExpressionList { $1 : $3 }

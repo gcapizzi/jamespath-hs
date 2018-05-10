@@ -30,18 +30,21 @@ module JMESPath.Json
   , greaterThan
   , lessThanOrEqual
   , greaterThanOrEqual
+  -- numeric functions
+  , abs
   ) where
 
 import Data.ByteString.Lazy (ByteString)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Prelude hiding (null)
+import Prelude hiding (null, abs)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Data.Vector as Vector
+import qualified Prelude (abs)
 
 newtype Value = Value Aeson.Value deriving (Show, Eq)
 
@@ -55,6 +58,9 @@ decodeString = decode . ByteString.pack
 
 encode :: Value -> ByteString
 encode (Value value) = Aeson.encode value
+
+encodeString :: Value -> String
+encodeString = ByteString.unpack . encode
 
 -- getters
 
@@ -215,3 +221,8 @@ toAeson (Value v) = v
 fromAeson :: Aeson.Value -> Value
 fromAeson = Value
 
+-- numeric functions
+
+abs :: Value -> Either String Value
+abs (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ Prelude.abs n
+abs value = Left $ "abs: invalid type of argument '" ++ encodeString value ++ "'"
