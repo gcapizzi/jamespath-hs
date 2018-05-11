@@ -30,6 +30,7 @@ library:
   - unordered-containers
   - vector
   - array
+  - scientific
   build-tools:
   - alex
   - happy

@@ -32,16 +32,19 @@ module JMESPath.Json
   , greaterThanOrEqual
   -- numeric functions
   , abs
+  , avg
   ) where
 
 import Data.ByteString.Lazy (ByteString)
+import Data.Foldable (foldrM)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Prelude hiding (null, abs)
+import Prelude hiding (abs, null, sum)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
+import qualified Data.Scientific as Scientific
 import qualified Data.Text as Text
 import qualified Data.Vector as Vector
 import qualified Prelude (abs)
@@ -226,3 +229,19 @@ fromAeson = Value
 abs :: Value -> Either String Value
 abs (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ Prelude.abs n
 abs value = Left $ "abs: invalid type of argument '" ++ encodeString value ++ "'"
+
+avg :: Value -> Either String Value
+avg (Value (Aeson.Array ns)) = if len == zero
+    then Right null
+    else do
+        (Aeson.Number sum) <- foldrM addAeson (Aeson.Number zero) ns
+        Right $ Value $ Aeson.Number (sum / len)
+  where
+    len = Scientific.scientific (fromIntegral $ Vector.length ns) 0
+    zero = Scientific.scientific 0 0
+avg value = Left $ "avg: invalid type of argument '" ++ encodeString value ++ "'"
+
+addAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
+addAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number (left + right)
+addAeson left (Aeson.Number _) = Left $ "avg: invalid type of value '" ++ ByteString.unpack (Aeson.encode left) ++ "'"
+addAeson _ _ = Left "avg: invalid type of values"
