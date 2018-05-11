@@ -122,9 +122,11 @@ SimpleExpression : '.' String { KeyExpression $2 Root }
                  | '[' NUMBER ']' { IndexExpression $2 Root }
                  | '.' '[' ExpressionList ']' { MultiSelectList $3 Root }
                  | '.' '{' KeyExpressionPairList '}' { MultiSelectHash $3 Root }
+                 | '.' UNQUOTED_STRING '(' ExpressionList ')' { FunctionCallExpression $2 $4 Root }
                  | SimpleExpression '[' NUMBER ']' { IndexExpression $3 $1 }
                  | SimpleExpression '.' '[' ExpressionList ']' { MultiSelectList $4 $1 }
                  | SimpleExpression '.' '{' KeyExpressionPairList '}' { MultiSelectHash $4 $1 }
+                 | SimpleExpression '.' UNQUOTED_STRING '(' ExpressionList ')' { FunctionCallExpression $3 $5 $1 }
 
 FirstSimpleExpression : String { KeyExpression $1 Root }
                       | FirstSimpleExpression '.' String { KeyExpression $3 $1 }
@@ -137,7 +139,7 @@ FirstSimpleExpression : String { KeyExpression $1 Root }
                       | JSON { JsonExpression $1 }
                       | JSON_RAW_STRING { JsonRawStringExpression $1 }
                       | '@' { CurrentNodeExpression }
-                      | UNQUOTED_STRING '(' ExpressionList ')' { FunctionCallExpression $1 $3 }
+                      | UNQUOTED_STRING '(' ExpressionList ')' { FunctionCallExpression $1 $3 Root }
 
 ExpressionList : Expression { [$1] }
                | Expression ',' ExpressionList { $1 : $3 }

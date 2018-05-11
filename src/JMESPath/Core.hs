@@ -104,6 +104,9 @@ searchValue (FilterExpression boolExpression left right) document = do
 searchValue (JsonExpression json) _ = Json.decodeString json
 searchValue (JsonRawStringExpression jsonRawString) _ = Right $ Json.string jsonRawString
 searchValue CurrentNodeExpression document = Right document
-searchValue (FunctionCallExpression functionName expressions) document = do
-    args <- mapM (`searchValue` document) expressions
+searchValue (FunctionCallExpression functionName argExpressions Root) document = do
+    args <- mapM (`searchValue` document) argExpressions
     Function.call functionName args
+searchValue (FunctionCallExpression functionName argExpressions expression) document = do
+    value <- searchValue expression document
+    searchValue (FunctionCallExpression functionName argExpressions Root) value

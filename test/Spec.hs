@@ -239,12 +239,21 @@ main = hspec $
         search "[?@ < `2`]" "[1, 2, 3]" `shouldBe` Right "[1]"
 
     context "with a function call" $ do
+      it "evaluates the function call" $ do
+        search "abs(foo)" "{\"foo\": -1}" `shouldBe` Right "1"
+        search "[].abs(@)" "[-1, 2, -3]" `shouldBe` Right "[1,2,3]"
+        search "[].foo.abs(@)" "[{\"foo\": -1}, {\"foo\": -2}, {\"foo\": -3}]" `shouldBe` Right "[1,2,3]"
+
       context "when the function does not exist" $
         it "returns an error" $
           search "foo(bar)" "{}" `shouldBe` Left "undefined function 'foo'"
 
-      it "evaluates the function call" $ do
-        search "abs(foo)" "{\"foo\": -1}" `shouldBe` Right "1"
-        search "abs(foo)" "{\"foo\": 1}" `shouldBe` Right "1"
-        search "abs(foo)" "{\"foo\": \"bar\"}" `shouldBe` Left "abs: invalid type of argument '\"bar\"'"
-        search "abs(foo, bar)" "{}" `shouldBe` Left "abs: invalid arity, expected one argument"
+      context "when the arity is wrong" $
+        it "returns an error" $
+          search "abs(foo, bar)" "{}" `shouldBe` Left "abs: invalid arity, expected one argument"
+
+      describe "abs" $
+        it "calculates a number's absolute value" $ do
+          search "abs(foo)" "{\"foo\": -1}" `shouldBe` Right "1"
+          search "abs(foo)" "{\"foo\": 1}" `shouldBe` Right "1"
+          search "abs(foo)" "{\"foo\": \"bar\"}" `shouldBe` Left "abs: invalid type of argument '\"bar\"'"
