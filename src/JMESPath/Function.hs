@@ -3,11 +3,32 @@ module JMESPath.Function
     call
     ) where
 
+import Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HashMap
+import qualified Data.Maybe as Maybe
 import qualified JMESPath.Json as Json
 
+data Function = Function
+    { arity :: Int
+    , run :: [Json.Value] -> Either String Json.Value
+    }
+
+functions :: HashMap String Function
+functions = HashMap.fromList
+    [ ("abs", Function { arity = 1, run = Json.abs . head })
+    , ("avg", Function { arity = 1, run = Json.avg . head })
+    ]
+
+getFunction :: String -> Either String Function
+getFunction functionName
+    | Maybe.isJust function = Right $ Maybe.fromJust function
+    | otherwise = Left $ "undefined function '" ++ functionName ++ "'"
+      where
+        function = HashMap.lookup functionName functions
+
 call :: String -> [Json.Value] -> Either String Json.Value
-call "abs" [n] = Json.abs n
-call "abs" _ = Left "abs: invalid arity, expected one argument"
-call "avg" [ns] = Json.avg ns
-call "avg" _ = Left "avg: invalid arity, expected one argument"
-call functionName _ = Left $ "undefined function '" ++ functionName ++ "'"
+call functionName args = do
+    function <- getFunction functionName
+    if length args == arity function
+        then run function args
+        else Left $ functionName ++ ": invalid arity, expected " ++ show (arity function) ++ " argument"

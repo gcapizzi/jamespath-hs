@@ -248,12 +248,15 @@ main = hspec $
         it "returns an error" $
           search "foo(bar)" "{}" `shouldBe` Left "undefined function 'foo'"
 
+      context "when the number of arguments is wrong" $
+        it "returns an error" $
+          search "abs(foo, bar)" "{}" `shouldBe` Left "abs: invalid arity, expected 1 argument"
+
       describe "abs" $
         it "calculates a number's absolute value" $ do
           search "abs(@)" "-1" `shouldBe` Right "1"
           search "abs(@)" "1" `shouldBe` Right "1"
           search "abs(@)" "\"bar\"" `shouldBe` Left "abs: invalid type of argument '\"bar\"'"
-          search "abs(foo, bar)" "{}" `shouldBe` Left "abs: invalid arity, expected one argument"
 
       describe "avg" $
         it "calculates the average of a list of numbers" $ do
@@ -261,4 +264,3 @@ main = hspec $
           search "avg(@)" "[10, \"foo\", 20]" `shouldBe` Left "avg: invalid type of value '\"foo\"'"
           search "avg(@)" "[]" `shouldBe` Right "null"
           search "avg(@)" "false" `shouldBe` Left "avg: invalid type of argument 'false'"
-          search "avg(foo, bar)" "{}" `shouldBe` Left "avg: invalid arity, expected one argument"
