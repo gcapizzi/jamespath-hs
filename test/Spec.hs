@@ -290,3 +290,10 @@ main = hspec $
           search "ceil(@)" "1.001" `shouldBe` Right "2"
           search "ceil(@)" "1" `shouldBe` Right "1"
           search "ceil(@)" "\"foo\"" `shouldBe` Right "null"
+
+      describe "ends_with" $
+        it "checks if a string ends with the provided suffix" $ do
+          search "ends_with(@, 'bar')" "\"foo\"" `shouldBe` Right "false"
+          search "ends_with(@, 'bar')" "\"foobar\"" `shouldBe` Right "true"
+          search "ends_with(@, `123`)" "\"foobar\"" `shouldBe` Left "ends_with: invalid type of argument '123'"
+          search "ends_with(@, 'bar')" "123" `shouldBe` Left "ends_with: invalid type of argument '123'"

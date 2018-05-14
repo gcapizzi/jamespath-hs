@@ -34,6 +34,8 @@ module JMESPath.Json
   , abs
   , avg
   , ceil
+  -- string functions
+  , endsWith
   -- other functions
   , contains
   ) where
@@ -244,6 +246,15 @@ addAeson _ _ = Left "avg: invalid type of values"
 ceil :: Value -> Either String Value
 ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromIntegral $ ceiling n
 ceil _ = Right null
+
+-- string functions
+
+endsWith :: Value -> Value -> Either String Value
+endsWith (Value (Aeson.String str)) (Value (Aeson.String suffix)) = Right $ bool $ Text.isSuffixOf suffix str
+endsWith (Value (Aeson.String _)) wrong = Left $ "ends_with: invalid type of argument '" ++ encodeString wrong ++ "'"
+endsWith wrong _ = Left $ "ends_with: invalid type of argument '" ++ encodeString wrong ++ "'"
+
+-- other functions
 
 contains :: Value -> Value -> Either String Value
 contains (Value (Aeson.Array values)) value = Right $ bool $ Vector.elem (toAeson value) values
