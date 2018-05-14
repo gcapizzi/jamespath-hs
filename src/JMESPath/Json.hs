@@ -33,6 +33,8 @@ module JMESPath.Json
   -- numeric functions
   , abs
   , avg
+  -- other functions
+  , contains
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -216,14 +218,6 @@ greaterThanOrEqual :: Value -> Value -> Value
 greaterThanOrEqual (Value (Aeson.Number left)) (Value (Aeson.Number right)) = bool $ left >= right
 greaterThanOrEqual _ _ = null
 
--- to/from Aeson
-
-toAeson :: Value -> Aeson.Value
-toAeson (Value v) = v
-
-fromAeson :: Aeson.Value -> Value
-fromAeson = Value
-
 -- numeric functions
 
 abs :: Value -> Either String Value
@@ -245,3 +239,17 @@ addAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 addAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number (left + right)
 addAeson left (Aeson.Number _) = Left $ "avg: invalid type of value '" ++ ByteString.unpack (Aeson.encode left) ++ "'"
 addAeson _ _ = Left "avg: invalid type of values"
+
+contains :: Value -> Value -> Either String Value
+contains (Value (Aeson.Array values)) value = Right $ bool $ Vector.elem (toAeson value) values
+contains (Value (Aeson.String str)) (Value (Aeson.String substr)) = Right $ bool $ Text.isInfixOf substr str
+contains (Value (Aeson.String _)) wrong = Left $ "contains: invalid type of argument '" ++ encodeString wrong ++ "'"
+contains wrong _ = Left $ "contains: invalid type of argument '" ++ encodeString wrong ++ "'"
+
+-- to/from Aeson
+
+toAeson :: Value -> Aeson.Value
+toAeson (Value v) = v
+
+fromAeson :: Aeson.Value -> Value
+fromAeson = Value

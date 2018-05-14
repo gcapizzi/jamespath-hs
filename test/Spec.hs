@@ -264,3 +264,19 @@ main = hspec $
           search "avg(@)" "[10, \"foo\", 20]" `shouldBe` Left "avg: invalid type of value '\"foo\"'"
           search "avg(@)" "[]" `shouldBe` Right "null"
           search "avg(@)" "false" `shouldBe` Left "avg: invalid type of argument 'false'"
+
+      describe "contains" $ do
+        context "with a value of the wrong type" $
+          it "returns an error" $
+            search "contains(@, 'foo')" "false" `shouldBe` Left "contains: invalid type of argument 'false'"
+
+        context "with an array" $
+          it "checks if the array contains the provided element" $ do
+            search "contains(@, 'foo')" "[\"bar\"]" `shouldBe` Right "false"
+            search "contains(@, 'foo')" "[\"foo\"]" `shouldBe` Right "true"
+
+        context "with a string" $
+          it "checks if the string contains the provided substring" $ do
+            search "contains(@, 'baz')" "\"foobar\"" `shouldBe` Right "false"
+            search "contains(@, 'bar')" "\"foobar\"" `shouldBe` Right "true"
+            search "contains(@, `false`)" "\"foobar\"" `shouldBe` Left "contains: invalid type of argument 'false'"

@@ -15,8 +15,9 @@ data Function = Function
 
 functions :: HashMap String Function
 functions = HashMap.fromList
-    [ ("abs", Function { arity = 1, run = Json.abs . head })
-    , ("avg", Function { arity = 1, run = Json.avg . head })
+    [ ("abs", Function { arity = 1, run = \[n] -> Json.abs n })
+    , ("avg", Function { arity = 1, run = \[n] -> Json.avg n })
+    , ("contains", Function { arity = 2, run = \[array, element] -> Json.contains array element })
     ]
 
 getFunction :: String -> Either String Function
