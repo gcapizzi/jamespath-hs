@@ -252,6 +252,10 @@ main = hspec $
         it "returns an error" $
           search "abs(foo, bar)" "{}" `shouldBe` Left "abs: invalid arity, expected 1 argument"
 
+      context "with nested calls" $
+        it "works" $
+          search "abs(avg(@))" "[-1, -2, -3]" `shouldBe` Right "2"
+
       describe "abs" $
         it "calculates a number's absolute value" $ do
           search "abs(@)" "-1" `shouldBe` Right "1"
