@@ -244,7 +244,7 @@ addAeson left (Aeson.Number _) = Left $ "avg: invalid type of value '" ++ ByteSt
 addAeson _ _ = Left "avg: invalid type of values"
 
 ceil :: Value -> Either String Value
-ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromIntegral $ ceiling n
+ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ ceiling n
 ceil _ = Right null
 
 -- string functions
