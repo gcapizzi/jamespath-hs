@@ -18,6 +18,7 @@ functions = HashMap.fromList
     [ ("abs", Function { arity = 1, run = \[n] -> Json.abs n })
     , ("avg", Function { arity = 1, run = \[n] -> Json.avg n })
     , ("contains", Function { arity = 2, run = \[array, element] -> Json.contains array element })
+    , ("ceil", Function { arity = 1, run = \[n] -> Json.ceil n })
     ]
 
 getFunction :: String -> Either String Function

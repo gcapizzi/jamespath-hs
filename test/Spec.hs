@@ -284,3 +284,9 @@ main = hspec $
             search "contains(@, 'baz')" "\"foobar\"" `shouldBe` Right "false"
             search "contains(@, 'bar')" "\"foobar\"" `shouldBe` Right "true"
             search "contains(@, `false`)" "\"foobar\"" `shouldBe` Left "contains: invalid type of argument 'false'"
+
+      describe "ceil" $
+        it "rounds a number to the next integer" $ do
+          search "ceil(@)" "1.001" `shouldBe` Right "2"
+          search "ceil(@)" "1" `shouldBe` Right "1"
+          search "ceil(@)" "\"foo\"" `shouldBe` Right "null"

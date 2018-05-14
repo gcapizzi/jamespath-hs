@@ -33,6 +33,7 @@ module JMESPath.Json
   -- numeric functions
   , abs
   , avg
+  , ceil
   -- other functions
   , contains
   ) where
@@ -239,6 +240,10 @@ addAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 addAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number (left + right)
 addAeson left (Aeson.Number _) = Left $ "avg: invalid type of value '" ++ ByteString.unpack (Aeson.encode left) ++ "'"
 addAeson _ _ = Left "avg: invalid type of values"
+
+ceil :: Value -> Either String Value
+ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromIntegral $ ceiling n
+ceil _ = Right null
 
 contains :: Value -> Value -> Either String Value
 contains (Value (Aeson.Array values)) value = Right $ bool $ Vector.elem (toAeson value) values
