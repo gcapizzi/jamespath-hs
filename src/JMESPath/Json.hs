@@ -245,7 +245,7 @@ addAeson _ _ = Left "avg: invalid type of values"
 
 ceil :: Value -> Either String Value
 ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ ceiling n
-ceil _ = Right null
+ceil wrong = Left $ "ceil: invalid type of argument '" ++ encodeString wrong ++ "'"
 
 -- string functions
 

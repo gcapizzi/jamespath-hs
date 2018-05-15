@@ -289,7 +289,7 @@ main = hspec $
         it "rounds a number to the next integer" $ do
           search "ceil(@)" "1.001" `shouldBe` Right "2"
           search "ceil(@)" "1" `shouldBe` Right "1"
-          search "ceil(@)" "\"foo\"" `shouldBe` Right "null"
+          search "ceil(@)" "\"foo\"" `shouldBe` Left "ceil: invalid type of argument '\"foo\"'"
 
       describe "ends_with" $
         it "checks if a string ends with the provided suffix" $ do
