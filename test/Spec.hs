@@ -297,3 +297,9 @@ main = hspec $
           search "ends_with(@, 'bar')" "\"foobar\"" `shouldBe` Right "true"
           search "ends_with(@, `123`)" "\"foobar\"" `shouldBe` Left "ends_with: invalid type of argument '123'"
           search "ends_with(@, 'bar')" "123" `shouldBe` Left "ends_with: invalid type of argument '123'"
+
+      describe "floor" $
+        it "rounds a number to the previous integer" $ do
+          search "floor(@)" "1.001" `shouldBe` Right "1"
+          search "floor(@)" "1" `shouldBe` Right "1"
+          search "floor(@)" "\"foo\"" `shouldBe` Left "floor: invalid type of argument '\"foo\"'"

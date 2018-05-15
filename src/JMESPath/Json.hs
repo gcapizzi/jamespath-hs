@@ -34,6 +34,7 @@ module JMESPath.Json
   , abs
   , avg
   , ceil
+  , floor
   -- string functions
   , endsWith
   -- other functions
@@ -44,7 +45,7 @@ import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (foldrM)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Prelude hiding (abs, null, sum)
+import Prelude hiding (abs, floor, null, sum)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
@@ -52,7 +53,7 @@ import qualified Data.Maybe as Maybe
 import qualified Data.Scientific as Scientific
 import qualified Data.Text as Text
 import qualified Data.Vector as Vector
-import qualified Prelude (abs)
+import qualified Prelude (abs, floor)
 
 newtype Value = Value Aeson.Value deriving (Show, Eq)
 
@@ -246,6 +247,10 @@ addAeson _ _ = Left "avg: invalid type of values"
 ceil :: Value -> Either String Value
 ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ ceiling n
 ceil wrong = Left $ "ceil: invalid type of argument '" ++ encodeString wrong ++ "'"
+
+floor :: Value -> Either String Value
+floor (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ Prelude.floor n
+floor wrong = Left $ "floor: invalid type of argument '" ++ encodeString wrong ++ "'"
 
 -- string functions
 

@@ -20,6 +20,7 @@ functions = HashMap.fromList
     , ("contains", Function { arity = 2, run = \[array, element] -> Json.contains array element })
     , ("ceil", Function { arity = 1, run = \[n] -> Json.ceil n })
     , ("ends_with", Function { arity = 2, run = \[string, suffix] -> Json.endsWith string suffix })
+    , ("floor", Function { arity = 1, run = \[n] -> Json.floor n })
     ]
 
 getFunction :: String -> Either String Function
