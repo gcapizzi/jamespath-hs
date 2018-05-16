@@ -22,6 +22,7 @@ functions = HashMap.fromList
     , ("ends_with", Function { arity = 2, run = \[string, suffix] -> Json.endsWith string suffix })
     , ("floor", Function { arity = 1, run = \[n] -> Json.floor n })
     , ("join", Function { arity = 2, run = \[glue, strings] -> Json.join glue strings })
+    , ("keys", Function { arity = 1, run = \[object] -> Json.keys object })
     ]
 
 getFunction :: String -> Either String Function

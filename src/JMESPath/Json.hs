@@ -40,6 +40,7 @@ module JMESPath.Json
   , join
   -- other functions
   , contains
+  , keys
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -288,6 +289,10 @@ contains (Value (Aeson.Array values)) value = Right $ bool $ Vector.elem (toAeso
 contains (Value (Aeson.String str)) (Value (Aeson.String substr)) = Right $ bool $ Text.isInfixOf substr str
 contains (Value (Aeson.String _)) wrong = Left $ "contains: invalid type of argument '" ++ encodeString wrong ++ "'"
 contains wrong _ = Left $ "contains: invalid type of argument '" ++ encodeString wrong ++ "'"
+
+keys :: Value -> Either String Value
+keys (Value (Aeson.Object obj)) = Right $ Value $ Aeson.Array $ Vector.fromList $ map Aeson.String $ HashMap.keys obj
+keys wrong = Left $ "keys: invalid type of argument '" ++ encodeString wrong ++ "'"
 
 -- to/from Aeson
 

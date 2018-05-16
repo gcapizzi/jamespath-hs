@@ -310,3 +310,9 @@ main = hspec $
           search "join(',', @)" "[\"foo\", 42]" `shouldBe` Left "join: invalid type of value '42'"
           search "join(',', @)" "false" `shouldBe` Left "join: invalid type of argument 'false'"
           search "join(`false`, @)" "[\"foo\", \"bar\"]" `shouldBe` Left "join: invalid type of argument 'false'"
+
+      describe "keys" $
+        it "returns the list of keys of an object" $ do
+          search "keys(@)" "{\"foo\": true, \"bar\": false}" `shouldBe` Right "[\"foo\",\"bar\"]"
+          search "keys(@)" "{}" `shouldBe` Right "[]"
+          search "keys(@)" "false" `shouldBe` Left "keys: invalid type of argument 'false'"
