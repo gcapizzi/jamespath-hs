@@ -228,7 +228,7 @@ greaterThanOrEqual _ _ = null
 
 abs :: Value -> Either String Value
 abs (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ Prelude.abs n
-abs value = Left $ "abs: invalid type of argument '" ++ encodeString value ++ "'"
+abs wrong = invalidTypeOfArgument "abs" wrong
 
 avg :: Value -> Either String Value
 avg (Value (Aeson.Array ns)) = if len == zero
@@ -239,7 +239,7 @@ avg (Value (Aeson.Array ns)) = if len == zero
   where
     len = Scientific.scientific (fromIntegral $ Vector.length ns) 0
     zero = Scientific.scientific 0 0
-avg value = Left $ "avg: invalid type of argument '" ++ encodeString value ++ "'"
+avg wrong = invalidTypeOfArgument "avg" wrong
 
 addAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 addAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number (left + right)
@@ -248,26 +248,26 @@ addAeson _ _ = Left "avg: invalid type of values"
 
 ceil :: Value -> Either String Value
 ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ ceiling n
-ceil wrong = Left $ "ceil: invalid type of argument '" ++ encodeString wrong ++ "'"
+ceil wrong = invalidTypeOfArgument "ceil" wrong
 
 floor :: Value -> Either String Value
 floor (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ Prelude.floor n
-floor wrong = Left $ "floor: invalid type of argument '" ++ encodeString wrong ++ "'"
+floor wrong = invalidTypeOfArgument "floor" wrong
 
 -- string functions
 
 endsWith :: Value -> Value -> Either String Value
 endsWith (Value (Aeson.String str)) (Value (Aeson.String suffix)) = Right $ bool $ Text.isSuffixOf suffix str
-endsWith (Value (Aeson.String _)) wrong = Left $ "ends_with: invalid type of argument '" ++ encodeString wrong ++ "'"
-endsWith wrong _ = Left $ "ends_with: invalid type of argument '" ++ encodeString wrong ++ "'"
+endsWith (Value (Aeson.String _)) wrong = invalidTypeOfArgument "ends_with" wrong
+endsWith wrong _ = invalidTypeOfArgument "ends_with" wrong
 
 join :: Value -> Value -> Either String Value
 join (Value glue@(Aeson.String _)) (Value (Aeson.Array strings)) = Value <$> foldrM concatAeson emptyString interspersedStrings
   where
     interspersedStrings = intersperseVector glue strings
     emptyString = Aeson.String Text.empty
-join (Value (Aeson.String _)) wrong = Left $ "join: invalid type of argument '" ++ encodeString wrong ++ "'"
-join wrong _ = Left $ "join: invalid type of argument '" ++ encodeString wrong ++ "'"
+join (Value (Aeson.String _)) wrong = invalidTypeOfArgument "join" wrong
+join wrong _ = invalidTypeOfArgument "join" wrong
 
 intersperseVector :: a -> Vector a -> Vector a
 intersperseVector glue values
@@ -287,12 +287,12 @@ concatAeson _ _ = Left "join: invalid type of values"
 contains :: Value -> Value -> Either String Value
 contains (Value (Aeson.Array values)) value = Right $ bool $ Vector.elem (toAeson value) values
 contains (Value (Aeson.String str)) (Value (Aeson.String substr)) = Right $ bool $ Text.isInfixOf substr str
-contains (Value (Aeson.String _)) wrong = Left $ "contains: invalid type of argument '" ++ encodeString wrong ++ "'"
-contains wrong _ = Left $ "contains: invalid type of argument '" ++ encodeString wrong ++ "'"
+contains (Value (Aeson.String _)) wrong = invalidTypeOfArgument "contains" wrong
+contains wrong _ = invalidTypeOfArgument "contains" wrong
 
 keys :: Value -> Either String Value
 keys (Value (Aeson.Object obj)) = Right $ Value $ Aeson.Array $ Vector.fromList $ map Aeson.String $ HashMap.keys obj
-keys wrong = Left $ "keys: invalid type of argument '" ++ encodeString wrong ++ "'"
+keys wrong = invalidTypeOfArgument "keys" wrong
 
 -- to/from Aeson
 
@@ -301,3 +301,8 @@ toAeson (Value v) = v
 
 fromAeson :: Aeson.Value -> Value
 fromAeson = Value
+
+-- errors
+
+invalidTypeOfArgument :: String -> Value -> Either String a
+invalidTypeOfArgument fn arg = Left $ fn ++ ": invalid type of argument '" ++ encodeString arg ++ "'"
