@@ -37,6 +37,7 @@ module JMESPath.Json
   , floor
   -- string functions
   , endsWith
+  , join
   -- other functions
   , contains
   ) where
@@ -45,7 +46,7 @@ import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (foldrM)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Prelude hiding (abs, floor, null, sum)
+import Prelude hiding (abs, floor, head, null, sum, tail)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
@@ -258,6 +259,27 @@ endsWith :: Value -> Value -> Either String Value
 endsWith (Value (Aeson.String str)) (Value (Aeson.String suffix)) = Right $ bool $ Text.isSuffixOf suffix str
 endsWith (Value (Aeson.String _)) wrong = Left $ "ends_with: invalid type of argument '" ++ encodeString wrong ++ "'"
 endsWith wrong _ = Left $ "ends_with: invalid type of argument '" ++ encodeString wrong ++ "'"
+
+join :: Value -> Value -> Either String Value
+join (Value glue@(Aeson.String _)) (Value (Aeson.Array strings)) = Value <$> foldrM concatAeson emptyString interspersedStrings
+  where
+    interspersedStrings = intersperseVector glue strings
+    emptyString = Aeson.String Text.empty
+join (Value (Aeson.String _)) wrong = Left $ "join: invalid type of argument '" ++ encodeString wrong ++ "'"
+join wrong _ = Left $ "join: invalid type of argument '" ++ encodeString wrong ++ "'"
+
+intersperseVector :: a -> Vector a -> Vector a
+intersperseVector glue values
+    | Vector.length values < 2 = values
+    | otherwise = Vector.cons head $ Vector.cons glue $ intersperseVector glue tail
+  where
+    head = Vector.head values
+    tail = Vector.tail values
+
+concatAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
+concatAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ Text.append left right
+concatAeson wrong (Aeson.String _) = Left $ "join: invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
+concatAeson _ _ = Left "join: invalid type of values"
 
 -- other functions
 

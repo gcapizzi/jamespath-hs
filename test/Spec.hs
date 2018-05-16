@@ -303,3 +303,10 @@ main = hspec $
           search "floor(@)" "1.001" `shouldBe` Right "1"
           search "floor(@)" "1" `shouldBe` Right "1"
           search "floor(@)" "\"foo\"" `shouldBe` Left "floor: invalid type of argument '\"foo\"'"
+
+      describe "join" $
+        it "joins an array of strings using a glue string" $ do
+          search "join(',', @)" "[\"foo\", \"bar\"]" `shouldBe` Right "\"foo,bar\""
+          search "join(',', @)" "[\"foo\", 42]" `shouldBe` Left "join: invalid type of value '42'"
+          search "join(',', @)" "false" `shouldBe` Left "join: invalid type of argument 'false'"
+          search "join(`false`, @)" "[\"foo\", \"bar\"]" `shouldBe` Left "join: invalid type of argument 'false'"
