@@ -41,13 +41,14 @@ module JMESPath.Json
   -- other functions
   , contains
   , keys
+  , length
   ) where
 
 import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (foldrM)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Prelude hiding (abs, floor, head, null, sum, tail)
+import Prelude hiding (abs, floor, head, null, sum, tail, length)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
@@ -293,6 +294,17 @@ contains wrong _ = invalidTypeOfArgument "contains" wrong
 keys :: Value -> Either String Value
 keys (Value (Aeson.Object obj)) = Right $ Value $ Aeson.Array $ Vector.fromList $ map Aeson.String $ HashMap.keys obj
 keys wrong = invalidTypeOfArgument "keys" wrong
+
+length :: Value -> Either String Value
+length (Value value) = do
+    len <- aesonLength value
+    return $ Value $ Aeson.Number $ Scientific.scientific len 0
+
+aesonLength :: Aeson.Value -> Either String Integer
+aesonLength (Aeson.Array values) = Right $ fromIntegral $ Vector.length values
+aesonLength (Aeson.String value) = Right $ fromIntegral $ Text.length value
+aesonLength (Aeson.Object values) = Right $ fromIntegral $ HashMap.size values
+aesonLength wrong = Left $ "length: invalid type of argument '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
 
 -- to/from Aeson
 

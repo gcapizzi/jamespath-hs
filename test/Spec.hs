@@ -317,3 +317,10 @@ main = hspec $
           search "keys(@)" "{\"foo\": true, \"bar\": false}" `shouldBe` Right "[\"foo\",\"bar\"]"
           search "keys(@)" "{}" `shouldBe` Right "[]"
           search "keys(@)" "false" `shouldBe` Left "keys: invalid type of argument 'false'"
+
+      describe "length" $
+        it "returns the length of an array, object or string" $ do
+          search "length(@)" "[1, 2, 3]" `shouldBe` Right "3"
+          search "length(@)" "\"foo\"" `shouldBe` Right "3"
+          search "length(@)" "{\"one\": 1, \"two\": 2}" `shouldBe` Right "2"
+          search "length(@)" "false" `shouldBe` Left "length: invalid type of argument 'false'"
