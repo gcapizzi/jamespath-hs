@@ -44,7 +44,7 @@ tokens :-
   \>\= { \_ -> TokenGreaterThanOrEqual }
   \[\? { \_ -> TokenOpenSquareQuestionMark }
   `[^`]+` { \s -> TokenJson (tail (init s)) }
-  '[^']+' { \s -> TokenJsonRawString (tail (init s)) }
+  '[^']*' { \s -> TokenJsonRawString (tail (init s)) }
   @ { \_ -> TokenAt }
 
 {
