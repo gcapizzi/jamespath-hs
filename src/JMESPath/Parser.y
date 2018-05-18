@@ -48,6 +48,7 @@ import JMESPath.Ast
     JSON { TokenJson $$ }
     JSON_RAW_STRING { TokenJsonRawString $$ }
     '@' { TokenAt }
+    '&' { TokenAmpersand }
 
 %left '||'
 %left '&&'
@@ -140,6 +141,7 @@ FirstSimpleExpression : String { KeyExpression $1 Root }
                       | JSON_RAW_STRING { JsonRawStringExpression $1 }
                       | '@' { CurrentNodeExpression }
                       | UNQUOTED_STRING '(' ExpressionList ')' { FunctionCallExpression $1 $3 Root }
+                      | '&' Expression { ExpressionExpression $2 }
 
 ExpressionList : Expression { [$1] }
                | Expression ',' ExpressionList { $1 : $3 }

@@ -110,3 +110,4 @@ searchValue (FunctionCallExpression functionName argExpressions Root) document =
 searchValue (FunctionCallExpression functionName argExpressions expression) document = do
     value <- searchValue expression document
     searchValue (FunctionCallExpression functionName argExpressions Root) value
+searchValue (ExpressionExpression expression) _ = Right $ Json.expression (searchValue expression)

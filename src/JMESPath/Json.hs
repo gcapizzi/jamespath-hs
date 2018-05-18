@@ -19,6 +19,7 @@ module JMESPath.Json
   , object
   , bool
   , string
+  , expression
   -- predicates
   , isNull
   , isFalsy
@@ -38,6 +39,8 @@ module JMESPath.Json
   -- string functions
   , endsWith
   , join
+  -- array functions
+  , mapExpression
   -- other functions
   , contains
   , keys
@@ -58,7 +61,12 @@ import qualified Data.Text as Text
 import qualified Data.Vector as Vector
 import qualified Prelude (abs, floor)
 
-newtype Value = Value Aeson.Value deriving (Show, Eq)
+data Value = Value Aeson.Value
+           | Expression (Value -> Either String Value)
+
+instance Eq Value where
+    (==) (Value left) (Value right) = left == right
+    (==) _ _ = False
 
 -- decode and encode
 
@@ -70,6 +78,7 @@ decodeString = decode . ByteString.pack
 
 encode :: Value -> ByteString
 encode (Value value) = Aeson.encode value
+encode _ = encode null
 
 encodeString :: Value -> String
 encodeString = ByteString.unpack . encode
@@ -178,6 +187,9 @@ object pairs = Value $ Aeson.Object $ HashMap.fromList $ map (fmap toAeson) pair
 string :: String -> Value
 string = Value . Aeson.String . Text.pack
 
+expression :: (Value -> Either String Value) -> Value
+expression = Expression
+
 -- predicates
 
 isNull :: Value -> Bool
@@ -186,6 +198,7 @@ isNull _ = False
 
 isFalsy :: Value -> Bool
 isFalsy (Value aesonValue) = isAesonFalsy aesonValue
+isFalsy _ = True
 
 isTruthy :: Value -> Bool
 isTruthy = not . isFalsy
@@ -283,6 +296,15 @@ concatAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ Te
 concatAeson wrong (Aeson.String _) = Left $ "join: invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
 concatAeson _ _ = Left "join: invalid type of values"
 
+-- array functions
+
+mapExpression :: Value -> Value -> Either String Value
+mapExpression (Expression fn) (Value (Aeson.Array values)) = do
+    mappedValues <- Vector.mapM (fmap toAeson . fn . fromAeson) values
+    return $ Value $ Aeson.Array mappedValues
+mapExpression (Expression _) wrong = invalidTypeOfArgument "map" wrong
+mapExpression wrong _ = invalidTypeOfArgument "map" wrong
+
 -- other functions
 
 contains :: Value -> Value -> Either String Value
@@ -299,6 +321,7 @@ length :: Value -> Either String Value
 length (Value value) = do
     len <- aesonLength value
     return $ Value $ Aeson.Number $ Scientific.scientific len 0
+length _ = Right $ Value $ Aeson.Number $ Scientific.scientific 0 0
 
 aesonLength :: Aeson.Value -> Either String Integer
 aesonLength (Aeson.Array values) = Right $ fromIntegral $ Vector.length values
@@ -310,6 +333,7 @@ aesonLength wrong = Left $ "length: invalid type of argument '" ++ ByteString.un
 
 toAeson :: Value -> Aeson.Value
 toAeson (Value v) = v
+toAeson _ = Aeson.Null
 
 fromAeson :: Aeson.Value -> Value
 fromAeson = Value

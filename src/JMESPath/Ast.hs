@@ -28,4 +28,5 @@ data Expression = Root
                 | JsonRawStringExpression String
                 | CurrentNodeExpression
                 | FunctionCallExpression String [Expression] Expression
+                | ExpressionExpression Expression
     deriving Show

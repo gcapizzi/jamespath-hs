@@ -324,3 +324,9 @@ main = hspec $
           search "length(@)" "\"foo\"" `shouldBe` Right "3"
           search "length(@)" "{\"one\": 1, \"two\": 2}" `shouldBe` Right "2"
           search "length(@)" "false" `shouldBe` Left "length: invalid type of argument 'false'"
+
+      describe "map" $
+        it "maps an expression over an array" $ do
+          search "map(&[0], @)" "[[1], [2], [3]]" `shouldBe` Right "[1,2,3]"
+          search "map(&[0], @)" "{}" `shouldBe` Left "map: invalid type of argument '{}'"
+          search "map(`false`, @)" "[]" `shouldBe` Left "map: invalid type of argument 'false'"

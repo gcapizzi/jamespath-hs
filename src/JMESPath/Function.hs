@@ -24,6 +24,7 @@ functions = HashMap.fromList
     , ("join", Function { arity = 2, run = \[glue, strings] -> Json.join glue strings })
     , ("keys", Function { arity = 1, run = \[object] -> Json.keys object })
     , ("length", Function { arity = 1, run = \[value] -> Json.length value })
+    , ("map", Function { arity = 2, run = \[fn, value] -> Json.mapExpression fn value })
     ]
 
 getFunction :: String -> Either String Function
