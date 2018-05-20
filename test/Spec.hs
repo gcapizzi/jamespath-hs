@@ -330,3 +330,14 @@ main = hspec $
           search "map(&[0], @)" "[[1], [2], [3]]" `shouldBe` Right "[1,2,3]"
           search "map(&[0], @)" "{}" `shouldBe` Left "map: invalid type of argument '{}'"
           search "map(`false`, @)" "[]" `shouldBe` Left "map: invalid type of argument 'false'"
+
+      describe "max" $
+        it "returns the maximum number or string in an array" $ do
+          search "max(@)" "[]" `shouldBe` Right "null"
+          search "max(@)" "[1, 3, 2]" `shouldBe` Right "3"
+          search "max(@)" "[\"c\", \"a\", \"b\"]" `shouldBe` Right "\"c\""
+          search "max(@)" "[1, false, 3]" `shouldBe` Left "max: invalid type of value 'false'"
+          search "max(@)" "[\"a\", {}, \"c\"]" `shouldBe` Left "max: invalid type of value '{}'"
+          search "max(@)" "[\"a\", 2, \"c\"]" `shouldBe` Left "max: invalid type of value '2'"
+          search "max(@)" "[1, \"b\", 3]" `shouldBe` Left "max: invalid type of value '\"b\"'"
+          search "max(@)" "false" `shouldBe` Left "max: invalid type of argument 'false'"

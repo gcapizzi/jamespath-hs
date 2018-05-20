@@ -25,6 +25,7 @@ functions = HashMap.fromList
     , ("keys", Function { arity = 1, run = \[object] -> Json.keys object })
     , ("length", Function { arity = 1, run = \[value] -> Json.length value })
     , ("map", Function { arity = 2, run = \[fn, value] -> Json.mapExpression fn value })
+    , ("max", Function { arity = 1, run = \[values] -> Json.max values })
     ]
 
 getFunction :: String -> Either String Function

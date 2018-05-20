@@ -41,6 +41,7 @@ module JMESPath.Json
   , join
   -- array functions
   , mapExpression
+  , max
   -- other functions
   , contains
   , keys
@@ -51,7 +52,7 @@ import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (foldrM)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Prelude hiding (abs, floor, head, null, sum, tail, length)
+import Prelude hiding (abs, floor, head, length, max, null, sum, tail)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
@@ -59,7 +60,7 @@ import qualified Data.Maybe as Maybe
 import qualified Data.Scientific as Scientific
 import qualified Data.Text as Text
 import qualified Data.Vector as Vector
-import qualified Prelude (abs, floor)
+import qualified Prelude (abs, floor, max)
 
 data Value = Value Aeson.Value
            | Expression (Value -> Either String Value)
@@ -304,6 +305,16 @@ mapExpression (Expression fn) (Value (Aeson.Array values)) = do
     return $ Value $ Aeson.Array mappedValues
 mapExpression (Expression _) wrong = invalidTypeOfArgument "map" wrong
 mapExpression wrong _ = invalidTypeOfArgument "map" wrong
+
+max :: Value -> Either String Value
+max (Value (Aeson.Array values)) = Value <$> foldrM maxAeson Aeson.Null values
+max wrong = invalidTypeOfArgument "max" wrong
+
+maxAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
+maxAeson other Aeson.Null = Right other
+maxAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number $ Prelude.max left right
+maxAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ Prelude.max left right
+maxAeson wrong _  = Left $ "max: invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
 
 -- other functions
 
