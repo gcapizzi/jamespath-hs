@@ -137,11 +137,11 @@ eachEvery step xs
 -- high order functions
 
 mapArray :: Monad m => (Value -> m Value) -> Value -> m Value
-mapArray f (Value (Aeson.Array values)) = Value <$> mapValues (fmap toAeson . f . fromAeson) values
+mapArray f (Value (Aeson.Array values)) = Value <$> mapValues (aesonFn f) values
 mapArray _ _ = return null
 
 mapObject :: Monad m => (Value -> m Value) -> Value -> m Value
-mapObject f (Value (Aeson.Object values)) = Value <$> mapValues (fmap toAeson . f . fromAeson) elems
+mapObject f (Value (Aeson.Object values)) = Value <$> mapValues (aesonFn f) elems
   where
     elems = Vector.fromList $ HashMap.elems values
 mapObject _ _ = return null
@@ -164,7 +164,7 @@ flattenArray (Value (Aeson.Array values)) = Value $ Aeson.Array $ Vector.foldr f
 flattenArray _ = null
 
 filterArray :: Monad m => (Value -> m Value) -> Value -> m Value
-filterArray f (Value (Aeson.Array values)) = Value <$> filterValues (fmap toAeson . f . fromAeson) values
+filterArray f (Value (Aeson.Array values)) = Value <$> filterValues (aesonFn f) values
 filterArray _ _ = return null
 
 filterValues :: Monad m => (Aeson.Value -> m Aeson.Value) -> Vector Aeson.Value -> m Aeson.Value
@@ -300,7 +300,7 @@ concatAeson _ _ = Left "join: invalid type of values"
 
 mapExpression :: Value -> Value -> Either String Value
 mapExpression (Expression fn) (Value (Aeson.Array values)) = do
-    mappedValues <- Vector.mapM (fmap toAeson . fn . fromAeson) values
+    mappedValues <- Vector.mapM (aesonFn fn) values
     return $ Value $ Aeson.Array mappedValues
 mapExpression (Expression _) wrong = invalidTypeOfArgument "map" wrong
 mapExpression wrong _ = invalidTypeOfArgument "map" wrong
@@ -337,6 +337,9 @@ toAeson _ = Aeson.Null
 
 fromAeson :: Aeson.Value -> Value
 fromAeson = Value
+
+aesonFn :: Monad m => (Value -> m Value) -> (Aeson.Value -> m Aeson.Value)
+aesonFn fn = fmap toAeson . fn . fromAeson
 
 -- errors
 
