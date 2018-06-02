@@ -322,16 +322,16 @@ maximumByExpression _ wrong = invalidTypeOfArgument "max_by" wrong
 
 foldrM1 :: (Monad m) => (a -> a -> m a) -> Vector a -> m a
 foldrM1 fn values
-    | Vector.null rst = return fst
-    | otherwise = foldrM1 fn rst >>= fn fst
+    | Vector.null tail = return head
+    | otherwise = foldrM1 fn tail >>= fn head
   where
-    fst = Vector.head values
-    rst = Vector.tail values
+    head = Vector.head values
+    tail = Vector.tail values
 
 maxAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 maxAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number $ max left right
 maxAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ max left right
-maxAeson wrong _  = Left $ "max: invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
+maxAeson _ _  = Left "max: invalid type of values"
 
 maxAesonBy :: (Aeson.Value -> Either String Aeson.Value) -> Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 maxAesonBy fn left right = do

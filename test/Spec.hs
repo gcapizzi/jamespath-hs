@@ -267,6 +267,7 @@ main = hspec $
         it "calculates the average of a list of numbers" $ do
           search "avg(@)" "[10, 15, 20]" `shouldBe` Right "15"
           search "avg(@)" "[10, \"foo\", 20]" `shouldBe` Left "avg: invalid type of value '\"foo\"'"
+          search "avg(@)" "[10, 20, \"foo\"]" `shouldBe` Left "avg: invalid type of value '\"foo\"'"
           search "avg(@)" "[]" `shouldBe` Right "null"
           search "avg(@)" "false" `shouldBe` Left "avg: invalid type of argument 'false'"
 
@@ -336,10 +337,11 @@ main = hspec $
           search "max(@)" "[]" `shouldBe` Right "null"
           search "max(@)" "[1, 3, 2]" `shouldBe` Right "3"
           search "max(@)" "[\"c\", \"a\", \"b\"]" `shouldBe` Right "\"c\""
-          search "max(@)" "[1, null, 3]" `shouldBe` Left "max: invalid type of value 'null'"
-          search "max(@)" "[\"a\", {}, \"c\"]" `shouldBe` Left "max: invalid type of value '{}'"
-          search "max(@)" "[\"a\", 2, \"c\"]" `shouldBe` Left "max: invalid type of value '2'"
-          search "max(@)" "[1, \"b\", 3]" `shouldBe` Left "max: invalid type of value '\"b\"'"
+          search "max(@)" "[1, null, 3]" `shouldBe` Left "max: invalid type of values"
+          search "max(@)" "[1, 2, null]" `shouldBe` Left "max: invalid type of values"
+          search "max(@)" "[\"a\", {}, \"c\"]" `shouldBe` Left "max: invalid type of values"
+          search "max(@)" "[\"a\", 2, \"c\"]" `shouldBe` Left "max: invalid type of values"
+          search "max(@)" "[1, \"b\", 3]" `shouldBe` Left "max: invalid type of values"
           search "max(@)" "false" `shouldBe` Left "max: invalid type of argument 'false'"
 
       describe "max_by" $
@@ -347,9 +349,9 @@ main = hspec $
           search "max_by(@, &[0])" "[]" `shouldBe` Right "null"
           search "max_by(@, &[0])" "[[1], [3], [2]]" `shouldBe` Right "[3]"
           search "max_by(@, &[0])" "[[\"c\"], [\"a\"], [\"b\"]]" `shouldBe` Right "[\"c\"]"
-          search "max_by(@, &[0])" "[[1], [false], [3]]" `shouldBe` Left "max: invalid type of value 'false'"
-          search "max_by(@, &[0])" "[[\"a\"], [{}], [\"c\"]]" `shouldBe` Left "max: invalid type of value '{}'"
-          search "max_by(@, &[0])" "[[\"a\"], [2], [\"c\"]]" `shouldBe` Left "max: invalid type of value '2'"
-          search "max_by(@, &[0])" "[[1], [\"b\"], [3]]" `shouldBe` Left "max: invalid type of value '\"b\"'"
+          search "max_by(@, &[0])" "[[1], [false], [3]]" `shouldBe` Left "max: invalid type of values"
+          search "max_by(@, &[0])" "[[\"a\"], [{}], [\"c\"]]" `shouldBe` Left "max: invalid type of values"
+          search "max_by(@, &[0])" "[[\"a\"], [2], [\"c\"]]" `shouldBe` Left "max: invalid type of values"
+          search "max_by(@, &[0])" "[[1], [\"b\"], [3]]" `shouldBe` Left "max: invalid type of values"
           search "max_by(@, &[0])" "false" `shouldBe` Left "max_by: invalid type of argument 'false'"
           search "max_by(@, `false`)" "[]" `shouldBe` Left "max_by: invalid type of argument 'false'"
