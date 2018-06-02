@@ -42,6 +42,7 @@ module JMESPath.Json
   -- array functions
   , mapExpression
   , maximum
+  , maximumByExpression
   -- other functions
   , contains
   , keys
@@ -312,6 +313,13 @@ maximum (Value (Aeson.Array values))
     | otherwise = Value <$> foldrM1 maxAeson values
 maximum wrong = invalidTypeOfArgument "max" wrong
 
+maximumByExpression :: Value -> Value -> Either String Value
+maximumByExpression (Value (Aeson.Array values)) (Expression fn)
+    | Vector.null values = Right null
+    | otherwise = Value <$> foldrM1 (maxAesonBy (aesonFn fn)) values
+maximumByExpression wrong (Expression _) = invalidTypeOfArgument "max_by" wrong
+maximumByExpression _ wrong = invalidTypeOfArgument "max_by" wrong
+
 foldrM1 :: (Monad m) => (a -> a -> m a) -> Vector a -> m a
 foldrM1 fn values
     | Vector.null rst = return fst
@@ -324,6 +332,15 @@ maxAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 maxAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number $ max left right
 maxAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ max left right
 maxAeson wrong _  = Left $ "max: invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
+
+maxAesonBy :: (Aeson.Value -> Either String Aeson.Value) -> Aeson.Value -> Aeson.Value -> Either String Aeson.Value
+maxAesonBy fn left right = do
+    leftResult <- fn left
+    rightResult <- fn right
+    maxResult <- maxAeson leftResult rightResult
+    if maxResult == leftResult
+        then return left
+        else return right
 
 -- other functions
 

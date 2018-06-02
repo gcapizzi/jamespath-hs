@@ -341,3 +341,15 @@ main = hspec $
           search "max(@)" "[\"a\", 2, \"c\"]" `shouldBe` Left "max: invalid type of value '2'"
           search "max(@)" "[1, \"b\", 3]" `shouldBe` Left "max: invalid type of value '\"b\"'"
           search "max(@)" "false" `shouldBe` Left "max: invalid type of argument 'false'"
+
+      describe "max_by" $
+        it "returns the value for which the expression returns the maximum number or string" $ do
+          search "max_by(@, &[0])" "[]" `shouldBe` Right "null"
+          search "max_by(@, &[0])" "[[1], [3], [2]]" `shouldBe` Right "[3]"
+          search "max_by(@, &[0])" "[[\"c\"], [\"a\"], [\"b\"]]" `shouldBe` Right "[\"c\"]"
+          search "max_by(@, &[0])" "[[1], [false], [3]]" `shouldBe` Left "max: invalid type of value 'false'"
+          search "max_by(@, &[0])" "[[\"a\"], [{}], [\"c\"]]" `shouldBe` Left "max: invalid type of value '{}'"
+          search "max_by(@, &[0])" "[[\"a\"], [2], [\"c\"]]" `shouldBe` Left "max: invalid type of value '2'"
+          search "max_by(@, &[0])" "[[1], [\"b\"], [3]]" `shouldBe` Left "max: invalid type of value '\"b\"'"
+          search "max_by(@, &[0])" "false" `shouldBe` Left "max_by: invalid type of argument 'false'"
+          search "max_by(@, `false`)" "[]" `shouldBe` Left "max_by: invalid type of argument 'false'"
