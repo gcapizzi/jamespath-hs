@@ -307,11 +307,20 @@ mapExpression (Expression _) wrong = invalidTypeOfArgument "map" wrong
 mapExpression wrong _ = invalidTypeOfArgument "map" wrong
 
 maximum :: Value -> Either String Value
-maximum (Value (Aeson.Array values)) = Value <$> foldrM maxAeson Aeson.Null values
+maximum (Value (Aeson.Array values))
+    | Vector.null values = Right null
+    | otherwise = Value <$> foldrM1 maxAeson values
 maximum wrong = invalidTypeOfArgument "max" wrong
 
+foldrM1 :: (Monad m) => (a -> a -> m a) -> Vector a -> m a
+foldrM1 fn values
+    | Vector.null rst = return fst
+    | otherwise = foldrM1 fn rst >>= fn fst
+  where
+    fst = Vector.head values
+    rst = Vector.tail values
+
 maxAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
-maxAeson other Aeson.Null = Right other
 maxAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number $ max left right
 maxAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ max left right
 maxAeson wrong _  = Left $ "max: invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
