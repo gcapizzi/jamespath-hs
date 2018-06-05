@@ -244,7 +244,7 @@ greaterThanOrEqual _ _ = null
 
 abs :: Value -> Either String Value
 abs (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ Prelude.abs n
-abs wrong = invalidTypeOfArgument "abs" wrong
+abs wrong = invalidTypeOfArgument wrong
 
 avg :: Value -> Either String Value
 avg (Value (Aeson.Array ns)) = if len == zero
@@ -255,35 +255,35 @@ avg (Value (Aeson.Array ns)) = if len == zero
   where
     len = Scientific.scientific (fromIntegral $ Vector.length ns) 0
     zero = Scientific.scientific 0 0
-avg wrong = invalidTypeOfArgument "avg" wrong
+avg wrong = invalidTypeOfArgument wrong
 
 addAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 addAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number (left + right)
-addAeson left (Aeson.Number _) = Left $ "avg: invalid type of value '" ++ ByteString.unpack (Aeson.encode left) ++ "'"
-addAeson _ _ = Left "avg: invalid type of values"
+addAeson left (Aeson.Number _) = Left $ "invalid type of value '" ++ ByteString.unpack (Aeson.encode left) ++ "'"
+addAeson _ _ = Left "invalid type of values"
 
 ceil :: Value -> Either String Value
 ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ ceiling n
-ceil wrong = invalidTypeOfArgument "ceil" wrong
+ceil wrong = invalidTypeOfArgument wrong
 
 floor :: Value -> Either String Value
 floor (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ Prelude.floor n
-floor wrong = invalidTypeOfArgument "floor" wrong
+floor wrong = invalidTypeOfArgument wrong
 
 -- string functions
 
 endsWith :: Value -> Value -> Either String Value
 endsWith (Value (Aeson.String str)) (Value (Aeson.String suffix)) = Right $ bool $ Text.isSuffixOf suffix str
-endsWith (Value (Aeson.String _)) wrong = invalidTypeOfArgument "ends_with" wrong
-endsWith wrong _ = invalidTypeOfArgument "ends_with" wrong
+endsWith (Value (Aeson.String _)) wrong = invalidTypeOfArgument wrong
+endsWith wrong _ = invalidTypeOfArgument wrong
 
 join :: Value -> Value -> Either String Value
 join (Value glue@(Aeson.String _)) (Value (Aeson.Array strings)) = Value <$> foldrM concatAeson emptyString interspersedStrings
   where
     interspersedStrings = intersperseVector glue strings
     emptyString = Aeson.String Text.empty
-join (Value (Aeson.String _)) wrong = invalidTypeOfArgument "join" wrong
-join wrong _ = invalidTypeOfArgument "join" wrong
+join (Value (Aeson.String _)) wrong = invalidTypeOfArgument wrong
+join wrong _ = invalidTypeOfArgument wrong
 
 intersperseVector :: a -> Vector a -> Vector a
 intersperseVector glue values
@@ -295,8 +295,8 @@ intersperseVector glue values
 
 concatAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 concatAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ Text.append left right
-concatAeson wrong (Aeson.String _) = Left $ "join: invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
-concatAeson _ _ = Left "join: invalid type of values"
+concatAeson wrong (Aeson.String _) = Left $ "invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
+concatAeson _ _ = Left "invalid type of values"
 
 -- array functions
 
@@ -304,21 +304,21 @@ mapExpression :: Value -> Value -> Either String Value
 mapExpression (Expression fn) (Value (Aeson.Array values)) = do
     mappedValues <- Vector.mapM (aesonFn fn) values
     return $ Value $ Aeson.Array mappedValues
-mapExpression (Expression _) wrong = invalidTypeOfArgument "map" wrong
-mapExpression wrong _ = invalidTypeOfArgument "map" wrong
+mapExpression (Expression _) wrong = invalidTypeOfArgument wrong
+mapExpression wrong _ = invalidTypeOfArgument wrong
 
 maximum :: Value -> Either String Value
 maximum (Value (Aeson.Array values))
     | Vector.null values = Right null
     | otherwise = Value <$> foldrM1 maxAeson values
-maximum wrong = invalidTypeOfArgument "max" wrong
+maximum wrong = invalidTypeOfArgument wrong
 
 maximumByExpression :: Value -> Value -> Either String Value
 maximumByExpression (Value (Aeson.Array values)) (Expression fn)
     | Vector.null values = Right null
     | otherwise = Value <$> foldrM1 (maxAesonBy (aesonFn fn)) values
-maximumByExpression wrong (Expression _) = invalidTypeOfArgument "max_by" wrong
-maximumByExpression _ wrong = invalidTypeOfArgument "max_by" wrong
+maximumByExpression wrong (Expression _) = invalidTypeOfArgument wrong
+maximumByExpression _ wrong = invalidTypeOfArgument wrong
 
 foldrM1 :: (Monad m) => (a -> a -> m a) -> Vector a -> m a
 foldrM1 fn values
@@ -331,7 +331,7 @@ foldrM1 fn values
 maxAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 maxAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number $ max left right
 maxAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ max left right
-maxAeson _ _  = Left "max: invalid type of values"
+maxAeson _ _  = Left "invalid type of values"
 
 maxAesonBy :: (Aeson.Value -> Either String Aeson.Value) -> Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 maxAesonBy fn left right = do
@@ -347,12 +347,12 @@ maxAesonBy fn left right = do
 contains :: Value -> Value -> Either String Value
 contains (Value (Aeson.Array values)) value = Right $ bool $ Vector.elem (toAeson value) values
 contains (Value (Aeson.String str)) (Value (Aeson.String substr)) = Right $ bool $ Text.isInfixOf substr str
-contains (Value (Aeson.String _)) wrong = invalidTypeOfArgument "contains" wrong
-contains wrong _ = invalidTypeOfArgument "contains" wrong
+contains (Value (Aeson.String _)) wrong = invalidTypeOfArgument wrong
+contains wrong _ = invalidTypeOfArgument wrong
 
 keys :: Value -> Either String Value
 keys (Value (Aeson.Object obj)) = Right $ Value $ Aeson.Array $ Vector.fromList $ map Aeson.String $ HashMap.keys obj
-keys wrong = invalidTypeOfArgument "keys" wrong
+keys wrong = invalidTypeOfArgument wrong
 
 length :: Value -> Either String Value
 length (Value value) = do
@@ -364,7 +364,7 @@ aesonLength :: Aeson.Value -> Either String Integer
 aesonLength (Aeson.Array values) = Right $ fromIntegral $ Vector.length values
 aesonLength (Aeson.String value) = Right $ fromIntegral $ Text.length value
 aesonLength (Aeson.Object values) = Right $ fromIntegral $ HashMap.size values
-aesonLength wrong = Left $ "length: invalid type of argument '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
+aesonLength wrong = Left $ "invalid type of argument '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
 
 -- to/from Aeson
 
@@ -380,5 +380,5 @@ aesonFn fn = fmap toAeson . fn . fromAeson
 
 -- errors
 
-invalidTypeOfArgument :: String -> Value -> Either String a
-invalidTypeOfArgument fn arg = Left $ fn ++ ": invalid type of argument '" ++ encodeString arg ++ "'"
+invalidTypeOfArgument :: Value -> Either String a
+invalidTypeOfArgument arg = Left $ "invalid type of argument '" ++ encodeString arg ++ "'"

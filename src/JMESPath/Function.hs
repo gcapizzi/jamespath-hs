@@ -3,6 +3,7 @@ module JMESPath.Function
     call
     ) where
 
+import Data.Bifunctor
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
@@ -39,6 +40,10 @@ getFunction functionName
 call :: String -> [Json.Value] -> Either String Json.Value
 call functionName args = do
     function <- getFunction functionName
-    if length args == arity function
-        then run function args
-        else Left $ functionName ++ ": invalid arity, expected " ++ show (arity function) ++ " argument"
+    let result = callFunction function args
+    first ((functionName ++ ": ") ++) result
+
+callFunction :: Function -> [Json.Value] -> Either String Json.Value
+callFunction Function{arity=fnArity, run=runFn} args
+    | length args == fnArity = runFn args
+    | otherwise = Left $ "invalid arity, expected " ++ show fnArity ++ " argument"
