@@ -355,3 +355,9 @@ main = hspec $
           search "max_by(@, &[0])" "[[1], [\"b\"], [3]]" `shouldBe` Left "max_by: invalid type of values"
           search "max_by(@, &[0])" "false" `shouldBe` Left "max_by: invalid type of argument 'false'"
           search "max_by(@, `false`)" "[]" `shouldBe` Left "max_by: invalid type of argument 'false'"
+
+      describe "merge" $
+        it "merges a list of objects" $ do
+          search "merge(`{\"foo\": 1}`)" "{}" `shouldBe` Right "{\"foo\":1}"
+          search "merge(`{\"foo\": 1}`, `{\"bar\": 2}`)" "{}" `shouldBe` Right "{\"foo\":1,\"bar\":2}"
+          search "merge(`{\"foo\": 1}`, `{\"foo\": 2}`)" "{}" `shouldBe` Right "{\"foo\":2}"

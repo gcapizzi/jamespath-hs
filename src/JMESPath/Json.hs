@@ -47,6 +47,7 @@ module JMESPath.Json
   , contains
   , keys
   , length
+  , merge
   ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -365,6 +366,14 @@ aesonLength (Aeson.Array values) = Right $ fromIntegral $ Vector.length values
 aesonLength (Aeson.String value) = Right $ fromIntegral $ Text.length value
 aesonLength (Aeson.Object values) = Right $ fromIntegral $ HashMap.size values
 aesonLength wrong = Left $ "invalid type of argument '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
+
+merge :: [Value] -> Either String Value
+merge values = Value <$> foldrM mergeAeson (Aeson.Object HashMap.empty) (map toAeson values)
+
+mergeAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
+mergeAeson (Aeson.Object left) (Aeson.Object right) = Right $ Aeson.Object $ HashMap.unionWith (flip const) left right
+mergeAeson left (Aeson.Object _) = Left $ "invalid type of value '" ++ ByteString.unpack (Aeson.encode left) ++ "'"
+mergeAeson _ _ = Left "invalid type of values"
 
 -- to/from Aeson
 

@@ -9,10 +9,8 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
 import qualified JMESPath.Json as Json
 
-data Function = Function
-    { arity :: Int
-    , run :: [Json.Value] -> Either String Json.Value
-    }
+data Function = Function { arity :: Int, run :: [Json.Value] -> Either String Json.Value }
+              | VarArgsFunction { run :: [Json.Value] -> Either String Json.Value }
 
 functions :: HashMap String Function
 functions = HashMap.fromList
@@ -28,6 +26,7 @@ functions = HashMap.fromList
     , ("map", Function { arity = 2, run = \[fn, value] -> Json.mapExpression fn value })
     , ("max", Function { arity = 1, run = \[values] -> Json.maximum values })
     , ("max_by", Function { arity = 2, run = \[values, fn] -> Json.maximumByExpression values fn })
+    , ("merge", VarArgsFunction { run = Json.merge })
     ]
 
 getFunction :: String -> Either String Function
@@ -47,3 +46,5 @@ callFunction :: Function -> [Json.Value] -> Either String Json.Value
 callFunction Function{arity=fnArity, run=runFn} args
     | length args == fnArity = runFn args
     | otherwise = Left $ "invalid arity, expected " ++ show fnArity ++ " argument"
+callFunction VarArgsFunction{run=runFn} args =
+    runFn args
