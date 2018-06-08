@@ -43,6 +43,7 @@ module JMESPath.Json
   , mapExpression
   , maximum
   , maximumByExpression
+  , minimum
   -- other functions
   , contains
   , keys
@@ -54,7 +55,7 @@ import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (foldrM)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Prelude hiding (abs, floor, head, length, maximum, null, sum, tail)
+import Prelude hiding (abs, floor, head, length, maximum, minimum, null, sum, tail)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
@@ -309,10 +310,16 @@ mapExpression (Expression _) wrong = invalidTypeOfArgument wrong
 mapExpression wrong _ = invalidTypeOfArgument wrong
 
 maximum :: Value -> Either String Value
-maximum (Value (Aeson.Array values))
+maximum = reduceArray maxAeson
+
+minimum :: Value -> Either String Value
+minimum = reduceArray minAeson
+
+reduceArray :: (Aeson.Value -> Aeson.Value -> Either String Aeson.Value) -> Value -> Either String Value
+reduceArray fn (Value (Aeson.Array values))
     | Vector.null values = Right null
-    | otherwise = Value <$> foldrM1 maxAeson values
-maximum wrong = invalidTypeOfArgument wrong
+    | otherwise = Value <$> foldrM1 fn values
+reduceArray _ wrong = invalidTypeOfArgument wrong
 
 maximumByExpression :: Value -> Value -> Either String Value
 maximumByExpression (Value (Aeson.Array values)) (Expression fn)
@@ -342,6 +349,11 @@ maxAesonBy fn left right = do
     if maxResult == leftResult
         then return left
         else return right
+
+minAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
+minAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number $ min left right
+minAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ min left right
+minAeson _ _  = Left "invalid type of values"
 
 -- other functions
 

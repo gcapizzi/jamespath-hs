@@ -27,6 +27,7 @@ functions = HashMap.fromList
     , ("max", Function { arity = 1, run = \[values] -> Json.maximum values })
     , ("max_by", Function { arity = 2, run = \[values, fn] -> Json.maximumByExpression values fn })
     , ("merge", VarArgsFunction { run = Json.merge })
+    , ("min", Function { arity = 1, run = \[values] -> Json.minimum values })
     ]
 
 getFunction :: String -> Either String Function

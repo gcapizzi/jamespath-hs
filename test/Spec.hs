@@ -361,3 +361,16 @@ main = hspec $
           search "merge(`{\"foo\": 1}`)" "{}" `shouldBe` Right "{\"foo\":1}"
           search "merge(`{\"foo\": 1}`, `{\"bar\": 2}`)" "{}" `shouldBe` Right "{\"foo\":1,\"bar\":2}"
           search "merge(`{\"foo\": 1}`, `{\"foo\": 2}`)" "{}" `shouldBe` Right "{\"foo\":2}"
+
+      describe "min" $
+        it "returns the minimum number or string in an array" $ do
+          search "min(@)" "[]" `shouldBe` Right "null"
+          search "min(@)" "[1, -3, 2]" `shouldBe` Right "-3"
+          search "min(@)" "[\"c\", \"a\", \"b\"]" `shouldBe` Right "\"a\""
+          search "min(@)" "[1, null, 3]" `shouldBe` Left "min: invalid type of values"
+          search "min(@)" "[1, 2, null]" `shouldBe` Left "min: invalid type of values"
+          search "min(@)" "[\"a\", {}, \"c\"]" `shouldBe` Left "min: invalid type of values"
+          search "min(@)" "[\"a\", 2, \"c\"]" `shouldBe` Left "min: invalid type of values"
+          search "min(@)" "[1, \"b\", 3]" `shouldBe` Left "min: invalid type of values"
+          search "min(@)" "false" `shouldBe` Left "min: invalid type of argument 'false'"
+
