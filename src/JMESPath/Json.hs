@@ -44,6 +44,7 @@ module JMESPath.Json
   , maximum
   , maximumByExpression
   , minimum
+  , minimumByExpression
   -- other functions
   , contains
   , keys
@@ -315,18 +316,19 @@ maximum = reduceArray maxAeson
 minimum :: Value -> Either String Value
 minimum = reduceArray minAeson
 
+maximumByExpression :: Value -> Value -> Either String Value
+maximumByExpression arrayValue (Expression fn) = reduceArray (maxAesonBy (aesonFn fn)) arrayValue
+maximumByExpression _ wrong = invalidTypeOfArgument wrong
+
+minimumByExpression :: Value -> Value -> Either String Value
+minimumByExpression arrayValue (Expression fn) = reduceArray (minAesonBy (aesonFn fn)) arrayValue
+minimumByExpression _ wrong = invalidTypeOfArgument wrong
+
 reduceArray :: (Aeson.Value -> Aeson.Value -> Either String Aeson.Value) -> Value -> Either String Value
 reduceArray fn (Value (Aeson.Array values))
     | Vector.null values = Right null
     | otherwise = Value <$> foldrM1 fn values
 reduceArray _ wrong = invalidTypeOfArgument wrong
-
-maximumByExpression :: Value -> Value -> Either String Value
-maximumByExpression (Value (Aeson.Array values)) (Expression fn)
-    | Vector.null values = Right null
-    | otherwise = Value <$> foldrM1 (maxAesonBy (aesonFn fn)) values
-maximumByExpression wrong (Expression _) = invalidTypeOfArgument wrong
-maximumByExpression _ wrong = invalidTypeOfArgument wrong
 
 foldrM1 :: (Monad m) => (a -> a -> m a) -> Vector a -> m a
 foldrM1 fn values
@@ -342,18 +344,24 @@ maxAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ max l
 maxAeson _ _  = Left "invalid type of values"
 
 maxAesonBy :: (Aeson.Value -> Either String Aeson.Value) -> Aeson.Value -> Aeson.Value -> Either String Aeson.Value
-maxAesonBy fn left right = do
-    leftResult <- fn left
-    rightResult <- fn right
-    maxResult <- maxAeson leftResult rightResult
-    if maxResult == leftResult
-        then return left
-        else return right
+maxAesonBy = chooseBy maxAeson
 
 minAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 minAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number $ min left right
 minAeson (Aeson.String left) (Aeson.String right) = Right $ Aeson.String $ min left right
 minAeson _ _  = Left "invalid type of values"
+
+minAesonBy :: (Aeson.Value -> Either String Aeson.Value) -> Aeson.Value -> Aeson.Value -> Either String Aeson.Value
+minAesonBy = chooseBy minAeson
+
+chooseBy :: (Eq a, Monad m) => (a -> a -> m a) -> (a -> m a) -> a -> a -> m a
+chooseBy chooseFn mapFn left right = do
+    leftResult <- mapFn left
+    rightResult <- mapFn right
+    chosenResult <- chooseFn leftResult rightResult
+    if chosenResult == leftResult
+        then return left
+        else return right
 
 -- other functions
 

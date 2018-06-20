@@ -374,3 +374,14 @@ main = hspec $
           search "min(@)" "[1, \"b\", 3]" `shouldBe` Left "min: invalid type of values"
           search "min(@)" "false" `shouldBe` Left "min: invalid type of argument 'false'"
 
+      describe "min_by" $
+        it "returns the value for which the expression returns the minimum number or string" $ do
+          search "min_by(@, &[0])" "[]" `shouldBe` Right "null"
+          search "min_by(@, &[0])" "[[1], [-3], [2]]" `shouldBe` Right "[-3]"
+          search "min_by(@, &[0])" "[[\"c\"], [\"a\"], [\"b\"]]" `shouldBe` Right "[\"a\"]"
+          search "min_by(@, &[0])" "[[1], [false], [3]]" `shouldBe` Left "min_by: invalid type of values"
+          search "min_by(@, &[0])" "[[\"a\"], [{}], [\"c\"]]" `shouldBe` Left "min_by: invalid type of values"
+          search "min_by(@, &[0])" "[[\"a\"], [2], [\"c\"]]" `shouldBe` Left "min_by: invalid type of values"
+          search "min_by(@, &[0])" "[[1], [\"b\"], [3]]" `shouldBe` Left "min_by: invalid type of values"
+          search "min_by(@, &[0])" "false" `shouldBe` Left "min_by: invalid type of argument 'false'"
+          search "min_by(@, `false`)" "[]" `shouldBe` Left "min_by: invalid type of argument 'false'"
