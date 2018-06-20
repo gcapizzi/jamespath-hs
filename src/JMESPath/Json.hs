@@ -250,20 +250,19 @@ abs (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ Prelude.abs n
 abs wrong = invalidTypeOfArgument wrong
 
 avg :: Value -> Either String Value
-avg (Value (Aeson.Array ns)) = if len == zero
-    then Right null
-    else do
-        (Aeson.Number sum) <- foldrM addAeson (Aeson.Number zero) ns
-        Right $ Value $ Aeson.Number (sum / len)
-  where
-    len = Scientific.scientific (fromIntegral $ Vector.length ns) 0
-    zero = Scientific.scientific 0 0
-avg wrong = invalidTypeOfArgument wrong
+avg ns = do
+    sumValue <- reduceArray addAeson ns
+    if isNull sumValue
+        then return null
+        else do
+            let (Value (Aeson.Number sum)) = sumValue
+            (Value (Aeson.Number len)) <- length ns
+            return $ Value $ Aeson.Number (sum / len)
 
 addAeson :: Aeson.Value -> Aeson.Value -> Either String Aeson.Value
 addAeson (Aeson.Number left) (Aeson.Number right) = Right $ Aeson.Number (left + right)
-addAeson left (Aeson.Number _) = Left $ "invalid type of value '" ++ ByteString.unpack (Aeson.encode left) ++ "'"
-addAeson _ _ = Left "invalid type of values"
+addAeson wrong (Aeson.Number _) = Left $ "invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
+addAeson _ wrong = Left $ "invalid type of value '" ++ ByteString.unpack (Aeson.encode wrong) ++ "'"
 
 ceil :: Value -> Either String Value
 ceil (Value (Aeson.Number n)) = Right $ Value $ Aeson.Number $ fromInteger $ ceiling n
