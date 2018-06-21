@@ -195,6 +195,9 @@ string = Value . Aeson.String . Text.pack
 expression :: (Value -> Either String Value) -> Value
 expression = Expression
 
+intNumber :: Integer -> Value
+intNumber n = Value $ Aeson.Number $ Scientific.scientific n 0
+
 -- predicates
 
 isNull :: Value -> Bool
@@ -375,10 +378,8 @@ keys (Value (Aeson.Object obj)) = Right $ Value $ Aeson.Array $ Vector.fromList 
 keys wrong = invalidTypeOfArgument wrong
 
 length :: Value -> Either String Value
-length (Value value) = do
-    len <- aesonLength value
-    return $ Value $ Aeson.Number $ Scientific.scientific len 0
-length _ = Right $ Value $ Aeson.Number $ Scientific.scientific 0 0
+length (Value value) = intNumber <$> aesonLength value
+length _ = Right $ intNumber 0
 
 aesonLength :: Aeson.Value -> Either String Integer
 aesonLength (Aeson.Array values) = Right $ fromIntegral $ Vector.length values
