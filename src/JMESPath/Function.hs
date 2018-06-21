@@ -30,6 +30,7 @@ functions = HashMap.fromList
     , ("min", Function { arity = 1, run = \[values] -> Json.minimum values })
     , ("min_by", Function { arity = 2, run = \[values, fn] -> Json.minimumByExpression values fn })
     , ("not_null", VarArgsFunction { run = Json.findFirstNonNull })
+    , ("reverse", Function { arity = 1, run = \[values] -> Json.reverse values })
     ]
 
 getFunction :: String -> Either String Function

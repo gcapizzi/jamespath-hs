@@ -390,3 +390,11 @@ main = hspec $
         it "returns the first non-null argument" $ do
           search "not_null(a, b, c, d)" "{\"c\": 42}" `shouldBe` Right "42"
           search "not_null(a, b, c, d)" "{}" `shouldBe` Right "null"
+
+      describe "reverse" $
+        it "reverses an array or a string" $ do
+          search "reverse(@)" "[]" `shouldBe` Right "[]"
+          search "reverse(@)" "[1, 2, 3]" `shouldBe` Right "[3,2,1]"
+          search "reverse(@)" "\"\"" `shouldBe` Right "\"\""
+          search "reverse(@)" "\"foobar\"" `shouldBe` Right "\"raboof\""
+          search "reverse(@)" "42" `shouldBe` Left "reverse: invalid type of argument '42'"
