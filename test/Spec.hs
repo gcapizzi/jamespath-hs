@@ -385,3 +385,8 @@ main = hspec $
           search "min_by(@, &[0])" "[[1], [\"b\"], [3]]" `shouldBe` Left "min_by: invalid type of values"
           search "min_by(@, &[0])" "false" `shouldBe` Left "min_by: invalid type of argument 'false'"
           search "min_by(@, `false`)" "[]" `shouldBe` Left "min_by: invalid type of argument 'false'"
+
+      describe "not_null" $
+        it "returns the first non-null argument" $ do
+          search "not_null(a, b, c, d)" "{\"c\": 42}" `shouldBe` Right "42"
+          search "not_null(a, b, c, d)" "{}" `shouldBe` Right "null"

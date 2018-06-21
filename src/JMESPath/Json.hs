@@ -45,6 +45,7 @@ module JMESPath.Json
   , maximumByExpression
   , minimum
   , minimumByExpression
+  , findFirstNonNull
   -- other functions
   , contains
   , keys
@@ -54,6 +55,7 @@ module JMESPath.Json
 
 import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (foldrM)
+import Data.List (find)
 import Data.Text (Text)
 import Data.Vector (Vector)
 import Prelude hiding (abs, floor, head, length, maximum, minimum, null, sum, tail)
@@ -364,6 +366,9 @@ chooseBy chooseFn mapFn left right = do
     if chosenResult == leftResult
         then return left
         else return right
+
+findFirstNonNull :: [Value] -> Either String Value
+findFirstNonNull values = Maybe.maybe (Right null) Right $ find (not . isNull) values
 
 -- other functions
 
