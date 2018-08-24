@@ -47,6 +47,7 @@ module JMESPath.Json
   , minimumByExpression
   , findFirstNonNull
   , reverse
+  , sort
   -- other functions
   , contains
   , keys
@@ -56,13 +57,13 @@ module JMESPath.Json
 
 import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (foldrM)
-import Data.List (find)
 import Data.Text (Text)
 import Data.Vector (Vector)
 import Prelude hiding (abs, floor, head, length, maximum, minimum, null, sum, reverse, tail)
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy.Char8 as ByteString
 import qualified Data.HashMap.Strict as HashMap
+import qualified Data.List as List
 import qualified Data.Maybe as Maybe
 import qualified Data.Scientific as Scientific
 import qualified Data.Text as Text
@@ -369,12 +370,19 @@ chooseBy chooseFn mapFn left right = do
         else return right
 
 findFirstNonNull :: [Value] -> Either String Value
-findFirstNonNull values = Maybe.maybe (Right null) Right $ find (not . isNull) values
+findFirstNonNull values = Maybe.maybe (Right null) Right $ List.find (not . isNull) values
 
 reverse :: Value -> Either String Value
 reverse (Value (Aeson.Array values)) = Right $ Value $ Aeson.Array $ Vector.reverse values
 reverse (Value (Aeson.String value)) = Right $ Value $ Aeson.String $ Text.reverse value
 reverse wrong = invalidTypeOfArgument wrong
+
+sort :: Value -> Either String Value
+sort (Value (Aeson.Array values)) = Right $ Value $ Aeson.Array $ sortVector values
+sort wrong = invalidTypeOfArgument wrong
+
+sortVector :: Ord a => Vector a -> Vector a
+sortVector = Vector.fromList . List.sort . Vector.toList
 
 -- other functions
 

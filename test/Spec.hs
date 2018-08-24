@@ -398,3 +398,11 @@ main = hspec $
           search "reverse(@)" "\"\"" `shouldBe` Right "\"\""
           search "reverse(@)" "\"foobar\"" `shouldBe` Right "\"raboof\""
           search "reverse(@)" "42" `shouldBe` Left "reverse: invalid type of argument '42'"
+
+      describe "sort" $
+        it "reverses an array or a string" $ do
+          search "sort(@)" "[]" `shouldBe` Right "[]"
+          search "sort(@)" "[3, 2, 1]" `shouldBe` Right "[1,2,3]"
+          -- search "sort(@)" "\"\"" `shouldBe` Right "\"\""
+          -- search "sort(@)" "\"foobar\"" `shouldBe` Right "\"raboof\""
+          -- search "sort(@)" "42" `shouldBe` Left "reverse: invalid type of argument '42'"
